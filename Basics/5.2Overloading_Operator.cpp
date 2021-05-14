@@ -13,6 +13,7 @@ public:
     const Point &operator--();
     const Point operator++(int);
     const Point operator--(int);
+    void output() const;
 };
 
 Point::Point(double x, double y)
@@ -59,11 +60,16 @@ const Point Point::operator--(int)
     return tmp;
 }
 
+void Point::output() const
+{
+    std::cout << this->pos_x() << ' ' << this->pos_y() << std::endl;
+}
+
 int main()
 {
     Point p(6.6, 5.5);
-    std::cout << (++p).pos_x() << ' ' << p.pos_y() << std::endl;
-    std::cout << (--p).pos_x() << ' ' << p.pos_y() << std::endl;
-    std::cout << (p++).pos_x() << ' ' << p.pos_y() << std::endl;
-    std::cout << (p--).pos_x() << ' ' << p.pos_y() << std::endl;
+    (++p).output();
+    (--p).output();
+    (p++).output();
+    (p--).output();
 }

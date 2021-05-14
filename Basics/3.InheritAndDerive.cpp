@@ -105,4 +105,5 @@ int main()
     std::cout << "This is a " << typeid(*shapes[0]).name() + 1 << ", its area is " << static_cast<Rectangle *>(shapes[0])->getArea() << std::endl;
     std::cout << "This is a " << typeid(*shapes[1]).name() + 1 << ", its area is " << static_cast<Round *>(shapes[1])->getArea() << std::endl;
     std::cout << "This is a " << typeid(*shapes[2]).name() + 1 << ", its area is " << static_cast<Square *>(shapes[2])->getArea() << std::endl;
+    delete static_cast<Square *>(shapes[2]);
 }

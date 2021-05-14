@@ -99,4 +99,6 @@ int main()
     shapes[2] = new Square(4);
     for (int i = 0; i < 3; i++)
         std::cout << "This is a " << typeid(*shapes[i]).name() + 1 << ", its area is " << shapes[i]->getArea() << std::endl;
+    for (int i = 0; i < 3; i++)
+        delete shapes[i];
 }

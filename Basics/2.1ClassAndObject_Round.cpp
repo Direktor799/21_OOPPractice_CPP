@@ -1,6 +1,6 @@
 #include <iostream>
 #include <cmath>
-
+#include <algorithm>
 class Point
 {
 private:
@@ -48,7 +48,8 @@ Round::Round(double pos_x, double pos_y, double radius) : m_center(pos_x, pos_y)
 
 bool Round::isIntersectWith(const Round &rx) const
 {
-    return m_radius + rx.m_radius >= sqrt((m_center.pos_x() - rx.m_center.pos_x()) * (m_center.pos_x() - rx.m_center.pos_x()) + (m_center.pos_y() - rx.m_center.pos_y()) * (m_center.pos_y() - rx.m_center.pos_y()));
+    double length = sqrt((m_center.pos_x() - rx.m_center.pos_x()) * (m_center.pos_x() - rx.m_center.pos_x()) + (m_center.pos_y() - rx.m_center.pos_y()) * (m_center.pos_y() - rx.m_center.pos_y()));
+    return m_radius + rx.m_radius >= length && std::min(m_radius, rx.m_radius) + length >= std::max(m_radius, rx.m_radius);
 }
 
 int main()
