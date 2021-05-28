@@ -14,9 +14,14 @@ QString User::getUserName() const
 
 bool User::isPasswordCorrect(const QString password) const
 {
-    if (password == m_password)
+    if (password == getPassword())
         return true;
     return false;
+}
+
+QString User::getPassword() const
+{
+    return m_password;
 }
 
 void User::setPassword(const QString new_password)
