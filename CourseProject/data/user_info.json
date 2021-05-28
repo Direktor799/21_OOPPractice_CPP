@@ -1,0 +1,10 @@
+{
+    "user_info": [
+        {
+            "username": "test",
+            "password": "123",
+            "type": "Buyer",
+            "balance": 114514
+        }
+    ]
+}
