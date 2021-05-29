@@ -10,14 +10,20 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 private:
     User *now_user;
-    Login *login_window;
-    QPushButton *account_btn;
+    QPushButton *password_change_btn;
+    QPushButton *top_up_btn;
     QPushButton *logout_btn;
-    AccountManager *my_account;
-    void setUser(User *user);
-    void toLogin();
+    PasswordChanger *password_changer;
+    WalletTopUper *wallet_top_uper;
+    void changePassword();
+    void changePasswordDone();
+    void topUpWallet();
+    void topUpWalletDone();
+    void changeUser();
 public:
-    MainWindow(QWidget *parent = nullptr);
+    MainWindow(User *user, QWidget *parent = nullptr);
     ~MainWindow();
+signals:
+    void toLogin();
 };
 #endif // MAINWINDOW_H

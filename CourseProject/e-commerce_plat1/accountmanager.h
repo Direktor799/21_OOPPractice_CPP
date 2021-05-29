@@ -4,24 +4,52 @@
 #include <QWidget>
 #include <QLabel>
 #include <QPushButton>
+#include <QLineEdit>
+#include <QValidator>
 #include "user.h"
 
 class AccountManager : public QWidget
 {
     Q_OBJECT
-private:
+protected:
     User *now_user;
-    QLabel *username_label;
-    QLabel *password_label;
-    QLabel *balance_label;
-    QPushButton *change_password_btn;
-    QPushButton *top_up_btn;
 public:
-    explicit AccountManager(QWidget *parent = nullptr);
-    void display();
-    void setUser(User *user);
+    explicit AccountManager(User *user, QWidget *parent = nullptr);
 signals:
 
+};
+
+class PasswordChanger : public AccountManager
+{
+    Q_OBJECT
+private:
+    QLabel *old_password_text;
+    QLineEdit *old_password_box;
+    QLabel *new_password_text;
+    QLineEdit *new_password_box;
+    QLabel *confirm_password_text;
+    QLineEdit *confirm_password_box;
+    QLabel *error_text;
+    QPushButton *submit_btn;
+    void changePassword();
+public:
+    explicit PasswordChanger(User *user, QWidget *parent = nullptr);
+signals:
+};
+
+class WalletTopUper : public AccountManager
+{
+    Q_OBJECT
+private:
+    QLabel *balance_text;
+    QLabel *top_up_text;
+    QLineEdit *top_up_box;
+    QPushButton *top_up_btn;
+    QString getBalanceString() const;
+    void topUpWallet();
+public:
+    explicit WalletTopUper(User *user, QWidget *parent = nullptr);
+signals:
 };
 
 #endif // ACCOUNTMANAGER_H
