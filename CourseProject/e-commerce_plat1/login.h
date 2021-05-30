@@ -13,13 +13,14 @@
 #include <QKeyEvent>
 #include <QButtonGroup>
 #include <QRadioButton>
-#include <mainwindow.h>
+#include "mainwindow.h"
 #include "user.h"
 
 class Login : public QWidget
 {
     Q_OBJECT
 private:
+    MainWindow *now_window;
     QLineEdit *username_box;
     QLabel *username_text;
     QLineEdit *password_box;
@@ -34,8 +35,8 @@ private:
     void logIn();
     void signUp();
 public:
-    explicit Login(QWidget *parent = nullptr);
-    void setDefault();
+    explicit Login(MainWindow *w, QWidget *parent = nullptr);
+    void setDefaultAndShow();
     ~Login();
 
 protected:

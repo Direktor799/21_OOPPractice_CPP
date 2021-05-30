@@ -13,7 +13,7 @@
             "username": "12"
         },
         {
-            "balance": 222.22,
+            "balance": 325.33,
             "password": "1",
             "type": "Buyer",
             "username": "1"
@@ -23,6 +23,12 @@
             "password": "test",
             "type": "Buyer",
             "username": "test"
+        },
+        {
+            "balance": 0,
+            "password": "123",
+            "type": "Buyer",
+            "username": "中文测试"
         }
     ]
 }

@@ -6,6 +6,7 @@
 #include <QPushButton>
 #include <QLineEdit>
 #include <QValidator>
+#include <QKeyEvent>
 #include "user.h"
 
 class AccountManager : public QWidget
@@ -13,6 +14,8 @@ class AccountManager : public QWidget
     Q_OBJECT
 protected:
     User *now_user;
+    QPushButton *submit_btn;
+    virtual void keyPressEvent(QKeyEvent *ev);
 public:
     explicit AccountManager(User *user, QWidget *parent = nullptr);
 signals:
@@ -30,7 +33,6 @@ private:
     QLabel *confirm_password_text;
     QLineEdit *confirm_password_box;
     QLabel *error_text;
-    QPushButton *submit_btn;
     void changePassword();
 public:
     explicit PasswordChanger(User *user, QWidget *parent = nullptr);
@@ -44,7 +46,6 @@ private:
     QLabel *balance_text;
     QLabel *top_up_text;
     QLineEdit *top_up_box;
-    QPushButton *top_up_btn;
     QString getBalanceString() const;
     void topUpWallet();
 public:

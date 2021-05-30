@@ -7,6 +7,13 @@ AccountManager::AccountManager(User *user, QWidget *parent) : QWidget(parent)
     now_user = user;
 }
 
+void AccountManager::keyPressEvent(QKeyEvent *ev)
+{
+    if(ev->key() == Qt::Key_Return || ev->key() == Qt::Key_Enter)
+        submit_btn->click();
+    QWidget::keyPressEvent(ev);
+}
+
 PasswordChanger::PasswordChanger(User *user, QWidget *parent) : AccountManager(user, parent)
 {
     setFixedSize(250, 150);
@@ -89,9 +96,9 @@ WalletTopUper::WalletTopUper(User *user, QWidget *parent) : AccountManager(user,
     top_up_box->setMaxLength(10);
     top_up_box->setFixedSize(80, 20);
     top_up_box->move(110, 40);
-    top_up_btn = new QPushButton("确认充值", this);
-    top_up_btn->move(65, 75);
-    connect(top_up_btn, &QPushButton::clicked, this, &WalletTopUper::topUpWallet);
+    submit_btn = new QPushButton("确认充值", this);
+    submit_btn->move(65, 75);
+    connect(submit_btn, &QPushButton::clicked, this, &WalletTopUper::topUpWallet);
     show();
 }
 

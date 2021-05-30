@@ -7,17 +7,32 @@ MainWindow::MainWindow(User *user, QWidget *parent) : QMainWindow(parent)
     wallet_top_uper = nullptr;
     setAttribute(Qt::WA_DeleteOnClose);
     setFixedSize(800, 600);
+    if (now_user != nullptr)
+    {
+        user_text = new QLabel("欢迎您，" + now_user->getUserName(), this);
+        user_text->adjustSize();
+        user_text->move(10, 7);
+        balance_text = new QLabel("当前余额: " + QString::number(now_user->getBalance(), 'f', 2) + "元", this);
+        balance_text->adjustSize();
+        balance_text->move(100, 7);
 
-    password_change_btn = new QPushButton("修改密码", this);
-    connect(password_change_btn, &QPushButton::clicked, this, &MainWindow::changePassword);
+        top_up_btn = new QPushButton("余额充值", this);
+        connect(top_up_btn, &QPushButton::clicked, this, &MainWindow::topUpWallet);
+        top_up_btn->move(300, 0);
 
-    top_up_btn = new QPushButton("余额充值", this);
-    top_up_btn->move(200, 0);
-    connect(top_up_btn, &QPushButton::clicked, this, &MainWindow::topUpWallet);
+        password_change_btn = new QPushButton("修改密码", this);
+        connect(password_change_btn, &QPushButton::clicked, this, &MainWindow::changePassword);
+        password_change_btn->move(400, 0);
 
-    logout_btn = new QPushButton("切换用户", this);
-    logout_btn->move(400, 0);
-    connect(logout_btn, &QPushButton::clicked, this, &MainWindow::changeUser);
+        logout_btn = new QPushButton("切换用户", this);
+        connect(logout_btn, &QPushButton::clicked, this, &MainWindow::changeUser);
+        logout_btn->move(500, 0);
+    }
+    else
+    {
+        login_btn = new QPushButton("登录", this);
+        connect(login_btn, &QPushButton::clicked, this, &MainWindow::changeUser);
+    }
 }
 
 void MainWindow::changePassword()
@@ -46,6 +61,8 @@ void MainWindow::topUpWallet()
 void MainWindow::topUpWalletDone()
 {
     wallet_top_uper = nullptr;
+    balance_text->setText("当前余额: " + QString::number(now_user->getBalance(), 'f', 2) + "元");
+    balance_text->adjustSize();
 }
 
 void MainWindow::changeUser()

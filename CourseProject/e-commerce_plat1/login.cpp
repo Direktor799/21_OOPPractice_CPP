@@ -1,7 +1,10 @@
 #include "login.h"
 
-Login::Login(QWidget *parent) : QWidget(parent)
+Login::Login(MainWindow *w, QWidget *parent) : QWidget(parent)
 {
+    now_window = w;
+    connect(w, &MainWindow::toLogin, this, &Login::setDefaultAndShow);
+
     //读取json数据并存入user_list
     QDir info_dir = QDir::currentPath();
     info_dir.cdUp();
@@ -80,9 +83,9 @@ void Login::logIn()
             if ((*i)->isPasswordCorrect(password_trying))
             {
                 error_text->hide();
-                MainWindow *w = new MainWindow(*i);
-                connect(w, &MainWindow::toLogin, this, &Login::setDefault);
-                w->show();
+                now_window = new MainWindow(*i);
+                connect(now_window, &MainWindow::toLogin, this, &Login::setDefaultAndShow);
+                now_window->show();
                 hide();
             }
             else
@@ -148,7 +151,7 @@ void Login::signUp()
     error_text->show();
 }
 
-void Login::setDefault()
+void Login::setDefaultAndShow()
 {
     username_box->clear();
     password_box->clear();
