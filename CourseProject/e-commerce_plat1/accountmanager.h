@@ -53,4 +53,28 @@ public:
 signals:
 };
 
+class AccountManagerBar : public QWidget
+{
+    Q_OBJECT
+private:
+    User *now_user;
+    QPushButton *login_btn;
+    QLabel *user_text;
+    QLabel *balance_text;
+    QPushButton *password_change_btn;
+    QPushButton *top_up_btn;
+    QPushButton *logout_btn;
+    PasswordChanger *password_changer;
+    WalletTopUper *wallet_top_uper;
+    void changePassword();
+    void changePasswordDone();
+    void topUpWallet();
+    void topUpWalletDone();
+    void changeUser();
+public:
+    explicit AccountManagerBar(User *user, QWidget *parent = nullptr);
+signals:
+    void toLogin();
+};
+
 #endif // ACCOUNTMANAGER_H
