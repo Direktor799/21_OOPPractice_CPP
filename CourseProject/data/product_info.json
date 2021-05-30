@@ -1,0 +1,18 @@
+{
+    "product_info": [
+        {
+            "amount": 5,
+            "describe": "A book for beginners in c++",
+            "name": "《C++ Primer》",
+            "price": 35.99,
+            "type": "Book"
+        },
+        {
+            "amount": 2,
+            "describe": "balabala",
+            "name": "《Effertive C++》",
+            "price": 10.5,
+            "type": "Book"
+        }
+    ]
+}

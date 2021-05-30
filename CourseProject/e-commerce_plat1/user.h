@@ -12,11 +12,11 @@ private:
 public:
     User(QString username, QString password, double balance);
     QString getUserName() const;
-    bool isPasswordCorrect(const QString password) const;
     QString getPassword() const;
-    void setPassword(const QString new_password);
     double getBalance() const;
+    void setPassword(const QString new_password);
     void setBalance(const double new_balance);
+    bool isPasswordCorrect(const QString password) const;
     virtual QString getUserType() const = 0;
     virtual ~User(){};
 };

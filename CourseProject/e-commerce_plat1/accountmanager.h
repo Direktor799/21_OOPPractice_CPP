@@ -7,6 +7,7 @@
 #include <QLineEdit>
 #include <QValidator>
 #include <QKeyEvent>
+#include <QPalette>
 #include "user.h"
 
 class AccountManager : public QWidget
@@ -53,7 +54,7 @@ public:
 signals:
 };
 
-class AccountManagerBar : public QWidget
+class AccountManagerBar : public QFrame
 {
     Q_OBJECT
 private:

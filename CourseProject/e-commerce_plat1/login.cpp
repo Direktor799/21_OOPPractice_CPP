@@ -169,7 +169,7 @@ void Login::keyPressEvent(QKeyEvent *ev)
 
 Login::~Login()
 {
-    //储存用户信息
+    //保存用户信息
     QDir info_dir = QDir::currentPath();
     info_dir.cdUp();
     info_dir.cd("data");

@@ -37,6 +37,10 @@ set(PROJECT_SOURCES
         login.h
         accountmanager.cpp
         accountmanager.h
+        product.cpp
+        product.h
+        productmanager.cpp
+        productmanager.h
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
