@@ -196,6 +196,8 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table_widget->horizontalHeader()->setSortIndicatorShown(true);
+    connect(table_widget->horizontalHeader(), &QHeaderView::sortIndicatorChanged, table_widget, &QTableWidget::sortItems);
     table_widget->setColumnWidth(0, 200);
     table_widget->setColumnWidth(1, 100);
     table_widget->setColumnWidth(2, 100);
@@ -205,7 +207,7 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     header << "商品名" << "类别" << "价格" << "数量";
     table_widget->setHorizontalHeaderLabels(header);
     table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
-    refreshTableWidget();
+    refreshTable();
 
     if (now_user != nullptr && now_user->getUserType() == "Seller")
     {
@@ -221,7 +223,7 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
 
 }
 
-void ProductManagerWidget::refreshTableWidget()
+void ProductManagerWidget::refreshTable()
 {
     table_widget->clearContents();
     for (int i = 0; i < product_list.size(); i++)
@@ -232,13 +234,16 @@ void ProductManagerWidget::refreshTableWidget()
         item = new QTableWidgetItem(product_list[i]->getType());
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 1, item);
-        item = new QTableWidgetItem(QString::number(product_list[i]->getPrice()));
+        item = new QTableWidgetItem();
+        item->setData(Qt::DisplayRole, product_list[i]->getPrice());
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 2, item);
-        item = new QTableWidgetItem(QString::number(product_list[i]->getAmount()));
+        item = new QTableWidgetItem();
+        item->setData(Qt::DisplayRole, product_list[i]->getAmount());
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 3, item);
     }
+    table_widget->horizontalHeader()->setSortIndicator(0,Qt::SortOrder::AscendingOrder);
 }
 
 void ProductManagerWidget::addProduct()
@@ -253,30 +258,44 @@ void ProductManagerWidget::addProduct()
 void ProductManagerWidget::addProductDone()
 {
     product_adder = nullptr;
-    refreshTableWidget();
+    refreshTable();
 }
 
 void ProductManagerWidget::modifyProduct(QTableWidgetItem *item)
 {
     if (product_modifier == nullptr)
     {
-        product_modifier = new ProductModifier(product_list, item->row());
-        connect(product_modifier, &ProductModifier::destroyed, this, &ProductManagerWidget::modifyProductDone);
+        for (int i = 0; i < product_list.size(); i++)
+        {
+            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text())
+            {
+                product_modifier = new ProductModifier(product_list, i);
+                connect(product_modifier, &ProductModifier::destroyed, this, &ProductManagerWidget::modifyProductDone);
+                break;
+            }
+        }
     }
 }
 
 void ProductManagerWidget::modifyProductDone()
 {
     product_modifier = nullptr;
-    refreshTableWidget();
+    refreshTable();
 }
 
 void ProductManagerWidget::displayProduct(QTableWidgetItem *item)
 {
     if (product_displayer == nullptr)
     {
-        product_displayer = new ProductDisplayer(product_list, item->row());
-        connect(product_displayer, &ProductDisplayer::destroyed, this, &ProductManagerWidget::displayProductDone);
+        for (int i = 0; i < product_list.size(); i++)
+        {
+            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text())
+            {
+                product_displayer = new ProductDisplayer(product_list, i);
+                connect(product_displayer, &ProductDisplayer::destroyed, this, &ProductManagerWidget::displayProductDone);
+                break;
+            }
+        }
     }
 }
 

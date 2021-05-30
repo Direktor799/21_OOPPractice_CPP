@@ -98,7 +98,7 @@ private:
     ProductAdder *product_adder;
     ProductModifier *product_modifier;
     ProductDisplayer *product_displayer;
-    void refreshTableWidget();
+    void refreshTable();
     void addProduct();
     void addProductDone();
     void modifyProduct(QTableWidgetItem *item);
