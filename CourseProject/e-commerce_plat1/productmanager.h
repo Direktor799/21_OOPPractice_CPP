@@ -9,6 +9,7 @@
 #include <QTableWidget>
 #include <QPushButton>
 #include <QHeaderView>
+#include <QErrorMessage>
 #include "product.h"
 
 class ProductManager : public QWidget

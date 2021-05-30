@@ -7,7 +7,11 @@ ProductManager::ProductManager(QWidget *parent) : QWidget(parent)
     info_dir.cdUp();
     info_dir.cd("data");
     QFile product_file(info_dir.path() + "/product_info.json");
-    product_file.open(QIODevice::ReadOnly | QIODevice::Text);
+    if (!product_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QErrorMessage *error = new QErrorMessage();
+        error->showMessage("商品文件读取错误");
+    }
     QString value = product_file.readAll();
     QJsonArray array = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("product_info")).toArray();
     for (int i = 0; i < array.size(); i++)

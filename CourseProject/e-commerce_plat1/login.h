@@ -13,6 +13,7 @@
 #include <QKeyEvent>
 #include <QButtonGroup>
 #include <QRadioButton>
+#include <QErrorMessage>
 #include "mainwindow.h"
 #include "user.h"
 

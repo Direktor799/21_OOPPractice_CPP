@@ -10,7 +10,11 @@ Login::Login(MainWindow *w, QWidget *parent) : QWidget(parent)
     info_dir.cdUp();
     info_dir.cd("data");
     QFile user_file(info_dir.path() + "/user_info.json");
-    user_file.open(QIODevice::ReadOnly | QIODevice::Text);
+    if(!user_file.open(QIODevice::ReadOnly | QIODevice::Text))
+    {
+        QErrorMessage *error = new QErrorMessage();
+        error->showMessage("用户文件读取错误，程序退出");
+    }
     QString value = user_file.readAll();
     QJsonArray array = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("user_info")).toArray();
     for (int i = 0; i < array.size(); i++)
