@@ -15,8 +15,47 @@
 #include <QTextEdit>
 #include <QComboBox>
 #include <QLabel>
+#include <QSlider>
 #include "product.h"
 #include "user.h"
+
+class ProductDisplayer : public QWidget
+{
+    Q_OBJECT
+private:
+    QVector<Product *> &product_list;
+    const int now_index;
+    QLabel *product_name_text;
+    QLabel *product_type_text;
+    QLabel *product_describe_text;
+    QLabel *product_price_text;
+    QLabel *product_amount_text;
+public:
+    explicit ProductDisplayer(QVector<Product *> &list, int index, QWidget *parent = nullptr);
+    virtual ~ProductDisplayer(){};
+signals:
+
+};
+
+class ProductDiscounter : public QWidget
+{
+    Q_OBJECT
+private:
+    QVector<Product *> &product_list;
+    QLabel *product_type_text;
+    QComboBox *product_type_box;
+    QLabel *product_discount_text;
+    QSlider *product_discount_slider;
+    QLabel *value_text;
+    void setSlider(const QString &s);
+    void displaySliderValue(int value);
+    void discountProduct();
+public:
+    explicit ProductDiscounter(QVector<Product *> &list, QWidget *parent = nullptr);
+    virtual ~ProductDiscounter(){};
+signals:
+
+};
 
 class ProductManager : public QWidget
 {
@@ -69,24 +108,6 @@ signals:
 
 };
 
-class ProductDisplayer : public QWidget
-{
-    Q_OBJECT
-private:
-    QVector<Product *> &product_list;
-    const int now_index;
-    QLabel *product_name_text;
-    QLabel *product_type_text;
-    QLabel *product_describe_text;
-    QLabel *product_price_text;
-    QLabel *product_amount_text;
-public:
-    explicit ProductDisplayer(QVector<Product *> &list, int index, QWidget *parent = nullptr);
-    virtual ~ProductDisplayer(){};
-signals:
-
-};
-
 class ProductManagerWidget : public QWidget
 {
     Q_OBJECT
@@ -95,9 +116,11 @@ private:
     QVector <Product *> product_list;
     QTableWidget *table_widget;
     QPushButton *add_product_btn;
+    QPushButton *discount_product_btn;
     ProductAdder *product_adder;
     ProductModifier *product_modifier;
     ProductDisplayer *product_displayer;
+    ProductDiscounter *product_discounter;
     void refreshTable();
     void addProduct();
     void addProductDone();
@@ -105,6 +128,8 @@ private:
     void modifyProductDone();
     void displayProduct(QTableWidgetItem *item);
     void displayProductDone();
+    void discountProduct();
+    void discountProductDone();
 public:
     explicit ProductManagerWidget(User *user, QWidget *parent = nullptr);
     ~ProductManagerWidget();

@@ -1,10 +1,14 @@
 {
+    "all_discount": 100,
+    "book_discount": 100,
+    "clothing_discount": 100,
+    "electronic_discount": 100,
     "product_info": [
         {
             "amount": 5,
             "describe": "A book for beginners in c++",
             "name": "《C++ Primer》",
-            "price": 35.99,
+            "price": 35,
             "type": "Book"
         },
         {
@@ -18,14 +22,14 @@
             "amount": 99,
             "describe": "贵就完事儿了",
             "name": "巴黎世家丝袜",
-            "price": 2099.99,
+            "price": 2100,
             "type": "Clothing"
         },
         {
             "amount": 10,
             "describe": "王小波世界第一",
             "name": "《沉默的大多数》",
-            "price": 19.99,
+            "price": 20,
             "type": "Book"
         },
         {
@@ -33,6 +37,62 @@
             "describe": "程序员的人文情怀",
             "name": "《月亮与六便士》",
             "price": 20,
+            "type": "Book"
+        },
+        {
+            "amount": 1111,
+            "describe": "11",
+            "name": "1",
+            "price": 100,
+            "type": "None"
+        },
+        {
+            "amount": 3,
+            "describe": "3",
+            "name": "3",
+            "price": 3,
+            "type": "Book"
+        },
+        {
+            "amount": 4,
+            "describe": "4",
+            "name": "4",
+            "price": 4,
+            "type": "Book"
+        },
+        {
+            "amount": 5,
+            "describe": "5",
+            "name": "5",
+            "price": 5,
+            "type": "Book"
+        },
+        {
+            "amount": 6,
+            "describe": "6",
+            "name": "6",
+            "price": 6,
+            "type": "Book"
+        },
+        {
+            "amount": 7,
+            "describe": "7",
+            "name": "7",
+            "price": 7,
+            "type": "Book"
+        },
+        {
+            "amount": 8,
+            "describe": "8",
+            "name": "8",
+            "price": 8,
+            "type": "Book"
+        },
+        {
+            "amount": 9,
+            "describe": "9",
+            "name": "9",
+            "price": 9,
             "type": "Book"
         }
     ]
