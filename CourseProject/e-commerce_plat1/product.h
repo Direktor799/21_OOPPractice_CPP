@@ -16,6 +16,7 @@ public:
     void setName(const QString new_name);
     void setDescribe(const QString new_describe);
     void setPrice(const double new_price);
+    void setAmount(const int new_amount);
     QString getName() const;
     QString getType() const;
     QString getDescribe() const;

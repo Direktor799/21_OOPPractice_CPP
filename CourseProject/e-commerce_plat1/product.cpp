@@ -3,7 +3,7 @@
 Product::Product(QString name, QString describe, double price, int amount)
 {
     m_name = name;
-    m_type = "";
+    m_type = "None";
     m_describe= describe;
     m_price = price;
     m_amount = amount;
@@ -22,6 +22,11 @@ void Product::setDescribe(const QString new_describe)
 void Product::setPrice(const double new_price)
 {
     m_price = new_price;
+}
+
+void Product::setAmount(const int new_amount)
+{
+    m_amount = new_amount;
 }
 
 QString Product::getName() const

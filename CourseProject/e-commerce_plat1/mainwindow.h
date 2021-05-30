@@ -13,7 +13,7 @@ class MainWindow : public QMainWindow
 private:
     User *now_user;
     AccountManagerBar *account_manager_bar;
-    ProductManager *product_manager;
+    ProductManagerWidget *product_manager;
     void recvToLogin();
 public:
     MainWindow(User *user, QWidget *parent = nullptr);

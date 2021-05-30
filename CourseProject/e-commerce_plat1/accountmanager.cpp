@@ -18,6 +18,7 @@ PasswordChanger::PasswordChanger(User *user, QWidget *parent) : AccountManager(u
 {
     setFixedSize(250, 150);
     setWindowTitle("修改密码");
+
     old_password_text = new QLabel("输入旧密码:", this);
     old_password_text->move(20, 12);
     old_password_box = new QLineEdit(this);

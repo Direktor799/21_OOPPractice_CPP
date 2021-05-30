@@ -1,7 +1,163 @@
 #include "productmanager.h"
 
-ProductManager::ProductManager(QWidget *parent) : QWidget(parent)
+ProductManager::ProductManager(QVector<Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
 {
+    setAttribute(Qt::WA_QuitOnClose,false);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setFixedSize(250, 250);
+
+    product_name_text = new QLabel("商品名称:", this);
+    product_name_text->move(20, 12);
+    product_name_box = new QLineEdit(this);
+    product_name_box->move(80, 10);
+
+    product_type_text = new QLabel("商品类型:", this);
+    product_type_text->move(20, 42);
+    product_type_box = new QComboBox(this);
+    product_type_box->addItem("Book");
+    product_type_box->addItem("Electronic");
+    product_type_box->addItem("Clothing");
+    product_type_box->addItem("None");
+    product_type_box->setEditable(false);
+    product_type_box->move(80, 42);
+
+    product_describe_text = new QLabel("商品描述:", this);
+    product_describe_text->move(20, 72);
+    product_describe_box = new QTextEdit(this);
+    product_describe_box->setFixedSize(150, 50);
+    product_describe_box->move(80, 72);
+
+    product_price_text = new QLabel("商品价格:", this);
+    product_price_text->move(20, 132);
+    product_price_box = new QLineEdit(this);
+    product_price_box->setValidator(new QDoubleValidator(0, 20000, 2, this));
+    product_price_box->setMaxLength(10);
+    product_price_box->setFixedSize(80, 20);
+    product_price_box->move(80, 132);
+
+    product_amount_text = new QLabel("商品数量:", this);
+    product_amount_text->move(20, 162);
+    product_amount_box = new QLineEdit(this);
+    product_amount_box->setValidator(new QIntValidator(0, 10000, this));
+    product_amount_box->setMaxLength(10);
+    product_amount_box->setFixedSize(80, 20);
+    product_amount_box->move(80, 162);
+
+    submit_btn = new QPushButton("提交", this);
+    submit_btn->move(90, 200);
+}
+
+void ProductManager::keyPressEvent(QKeyEvent *ev)
+{
+    if(ev->key() == Qt::Key_Return || ev->key() == Qt::Key_Enter)
+        submit_btn->click();
+    QWidget::keyPressEvent(ev);
+}
+
+ProductAdder::ProductAdder(QVector<Product *> &list, QWidget *parent) : ProductManager(list, parent)
+{
+    setWindowTitle("添加商品");
+    connect(submit_btn, &QPushButton::clicked, this, &ProductAdder::addProduct);
+    show();
+}
+
+void ProductAdder::addProduct()
+{
+    QString name = product_name_box->text();
+    QString type = product_type_box->currentText();
+    QString describe = product_describe_box->toPlainText();
+    double price = product_price_box->text().toDouble();
+    int amount = product_amount_box->text().toInt();
+
+    Product *new_product;
+    if (type == "Book")
+        new_product = new BookProduct(name, describe, price, amount);
+    else if (type == "Electronic")
+        new_product = new ElectronicProduct(name, describe, price, amount);
+    else if (type == "Clothing")
+        new_product = new ClothingProduct(name, describe, price, amount);
+    else
+        new_product = new Product(name, describe, price, amount);
+    product_list.push_back(new_product);
+    close();
+}
+
+ProductModifier::ProductModifier(QVector<Product *> &list, int index, QWidget *parent) : ProductManager(list, parent), now_index(index)
+{
+    setWindowTitle("修改商品");
+    product_name_box->setText(product_list[now_index]->getName());
+    product_type_box->setCurrentText(product_list[now_index]->getType());
+    product_type_box->setDisabled(true);
+    product_describe_box->setText(product_list[now_index]->getDescribe());
+    product_price_box->setText(QString::number(product_list[now_index]->getPrice()));
+    product_amount_box->setText(QString::number(product_list[now_index]->getAmount()));
+    submit_btn->move(45, 200);
+    connect(submit_btn, &QPushButton::clicked, this, &ProductModifier::modifyProduct);
+    stop_sale_btn = new QPushButton("下架", this);
+    stop_sale_btn->move(135, 200);
+    connect(stop_sale_btn, &QPushButton::clicked, this, &ProductModifier::deleteProduct);
+    show();
+}
+
+void ProductModifier::modifyProduct()
+{
+    QString name = product_name_box->text();
+    QString describe = product_describe_box->toPlainText();
+    double price = product_price_box->text().toDouble();
+    int amount = product_amount_box->text().toInt();
+    product_list[now_index]->setName(name);
+    product_list[now_index]->setDescribe(describe);
+    product_list[now_index]->setPrice(price);
+    product_list[now_index]->setAmount(amount);
+    close();
+}
+
+void ProductModifier::deleteProduct()
+{
+    product_list.erase(product_list.begin() + now_index);
+    close();
+}
+
+ProductDisplayer::ProductDisplayer(QVector<Product *> &list, int index, QWidget *parent) : QWidget(parent), product_list(list), now_index(index)
+{
+    setAttribute(Qt::WA_QuitOnClose,false);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setFixedSize(250, 200);
+
+    product_name_text = new QLabel("商品名称: " + product_list[now_index]->getName(), this);
+    product_name_text->setWordWrap(true);
+    product_name_text->setFixedSize(210,25);
+    product_name_text->move(20, 12);
+
+    product_type_text = new QLabel("商品类型: " + product_list[now_index]->getType(), this);
+    product_type_text->setWordWrap(true);
+    product_type_text->setFixedSize(210,25);
+    product_type_text->move(20, 42);
+
+    product_describe_text = new QLabel("商品描述: " + product_list[now_index]->getDescribe(), this);
+    product_describe_text->setWordWrap(true);
+    product_describe_text->setFixedSize(210,50);
+    product_describe_text->move(20, 72);
+
+    product_price_text = new QLabel("商品价格: " + QString::number(product_list[now_index]->getPrice()), this);
+    product_price_text->setWordWrap(true);
+    product_price_text->setFixedSize(210,25);
+    product_price_text->move(20, 132);
+
+    product_amount_text = new QLabel("商品数量: " + QString::number(product_list[now_index]->getAmount()), this);
+    product_amount_text->setWordWrap(true);
+    product_amount_text->setFixedSize(210,25);
+    product_amount_text->move(20, 162);
+    show();
+}
+
+ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidget(parent)
+{
+    now_user = user;
+    product_adder = nullptr;
+    product_modifier = nullptr;
+    product_displayer = nullptr;
+
     //读取json并存入product_list
     QDir info_dir = QDir::currentPath();
     info_dir.cdUp();
@@ -37,6 +193,7 @@ ProductManager::ProductManager(QWidget *parent) : QWidget(parent)
     //界面
     table_widget = new QTableWidget(10, 4, this);
     table_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     table_widget->setColumnWidth(0, 200);
@@ -48,6 +205,25 @@ ProductManager::ProductManager(QWidget *parent) : QWidget(parent)
     header << "商品名" << "类别" << "价格" << "数量";
     table_widget->setHorizontalHeaderLabels(header);
     table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
+    refreshTableWidget();
+
+    if (now_user != nullptr && now_user->getUserType() == "Seller")
+    {
+        add_product_btn = new QPushButton("添加商品", this);
+        add_product_btn->move(600, 100);
+        connect(add_product_btn, &QPushButton::clicked, this, &ProductManagerWidget::addProduct);
+        connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::modifyProduct);
+    }
+    else
+        connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::displayProduct);
+
+    setFixedSize(900, 450);
+
+}
+
+void ProductManagerWidget::refreshTableWidget()
+{
+    table_widget->clearContents();
     for (int i = 0; i < product_list.size(); i++)
     {
         QTableWidgetItem *item = new QTableWidgetItem(product_list[i]->getName());
@@ -63,12 +239,53 @@ ProductManager::ProductManager(QWidget *parent) : QWidget(parent)
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 3, item);
     }
-    setFixedSize(900, 450);
-
-
 }
 
-ProductManager::~ProductManager()
+void ProductManagerWidget::addProduct()
+{
+    if (product_adder == nullptr)
+    {
+        product_adder = new ProductAdder(product_list);
+        connect(product_adder, &ProductAdder::destroyed, this, &ProductManagerWidget::addProductDone);
+    }
+}
+
+void ProductManagerWidget::addProductDone()
+{
+    product_adder = nullptr;
+    refreshTableWidget();
+}
+
+void ProductManagerWidget::modifyProduct(QTableWidgetItem *item)
+{
+    if (product_modifier == nullptr)
+    {
+        product_modifier = new ProductModifier(product_list, item->row());
+        connect(product_modifier, &ProductModifier::destroyed, this, &ProductManagerWidget::modifyProductDone);
+    }
+}
+
+void ProductManagerWidget::modifyProductDone()
+{
+    product_modifier = nullptr;
+    refreshTableWidget();
+}
+
+void ProductManagerWidget::displayProduct(QTableWidgetItem *item)
+{
+    if (product_displayer == nullptr)
+    {
+        product_displayer = new ProductDisplayer(product_list, item->row());
+        connect(product_displayer, &ProductDisplayer::destroyed, this, &ProductManagerWidget::displayProductDone);
+    }
+}
+
+void ProductManagerWidget::displayProductDone()
+{
+    product_displayer = nullptr;
+}
+
+ProductManagerWidget::~ProductManagerWidget()
 {
     //保存商品信息
     QDir info_dir = QDir::currentPath();

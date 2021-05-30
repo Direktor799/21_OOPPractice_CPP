@@ -9,7 +9,7 @@ MainWindow::MainWindow(User *user, QWidget *parent) : QMainWindow(parent)
     account_manager_bar = new AccountManagerBar(now_user, this);
     connect(account_manager_bar, &AccountManagerBar::toLogin, this, &MainWindow::recvToLogin);
 
-    product_manager = new ProductManager(this);
+    product_manager = new ProductManagerWidget(now_user, this);
     product_manager->move(0, 24);
 }
 
