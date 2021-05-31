@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
-<!-- Written by QtCreator 4.14.1, 2021-05-31T08:22:17. -->
+<!-- Written by QtCreator 4.14.1, 2021-05-31T22:44:24. -->
 <qtcreator>
  <data>
   <variable>EnvironmentId</variable>
@@ -345,7 +345,6 @@
     <value type="bool" key="RunConfiguration.UseLibrarySearchPath">true</value>
     <value type="bool" key="RunConfiguration.UseQmlDebugger">false</value>
     <value type="bool" key="RunConfiguration.UseQmlDebuggerAuto">true</value>
-    <value type="QString" key="RunConfiguration.WorkingDirectory.default">C:/Users/Price/Desktop/Codes/21_OOPPractice_CPP/CourseProject/build-e-commerce_plat1-Desktop_Qt_6_0_2_MinGW_64_bit-Debug</value>
    </valuemap>
    <value type="int" key="ProjectExplorer.Target.RunConfigurationCount">1</value>
   </valuemap>

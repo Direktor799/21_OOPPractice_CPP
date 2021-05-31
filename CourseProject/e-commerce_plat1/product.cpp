@@ -5,10 +5,10 @@ int BookProduct::discount_ratio;
 int ElectronicProduct::discount_ratio;
 int ClothingProduct::discount_ratio;
 
-Product::Product(QString name, QString describe, double price, int amount)
+Product::Product(QString name, QString describe, double price, int amount, QString type)
 {
     m_name = name;
-    m_type = "None";
+    m_type = type;
     m_describe= describe;
     m_price = price;
     m_amount = amount;
@@ -74,9 +74,9 @@ void Product::setDiscount(const int new_discount)
     discount_ratio = new_discount;
 }
 
-BookProduct::BookProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount)
+BookProduct::BookProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Book")
 {
-    m_type = "Book";
+
 }
 
 double BookProduct::getPrice() const
@@ -94,9 +94,9 @@ void BookProduct::setDiscount(const int new_discount)
     discount_ratio = new_discount;
 }
 
-ElectronicProduct::ElectronicProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount)
+ElectronicProduct::ElectronicProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Electronic")
 {
-    m_type = "Electronic";
+
 }
 
 double ElectronicProduct::getPrice() const
@@ -114,9 +114,9 @@ void ElectronicProduct::setDiscount(const int new_discount)
     discount_ratio = new_discount;
 }
 
-ClothingProduct::ClothingProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount)
+ClothingProduct::ClothingProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Clothing")
 {
-    m_type = "Clothing";
+
 }
 
 double ClothingProduct::getPrice() const

@@ -21,30 +21,29 @@ class Login : public QWidget
 {
     Q_OBJECT
 private:
-    MainWindow *now_window;
-    QLineEdit *username_box;
-    QLabel *username_text;
-    QLineEdit *password_box;
-    QLabel *password_text;
-    QLabel *error_text;
-    QPushButton *login_btn;
-    QPushButton *sign_up_btn;
-    QButtonGroup *user_type_btngrp;
-    QRadioButton *seller_btn;
-    QRadioButton *buyer_btn;
-    QVector<User *> user_list;
-    void logIn();
-    void signUp();
+    MainWindow *now_window;     //现在
+    QLineEdit *username_box;    //用户名输入框
+    QLabel *username_text;      //用户名输入提示文本
+    QLineEdit *password_box;    //密码输入框
+    QLabel *password_text;      //密码输入提示文本
+    QLabel *error_text;         //错误信息提示文本
+    QPushButton *login_btn;     //登录按钮
+    QPushButton *sign_up_btn;   //注册按钮
+    QButtonGroup *user_type_btngrp; //用户类别互斥按钮组
+    QRadioButton *seller_btn;   //卖家选项
+    QRadioButton *buyer_btn;    //卖家选项
+    QVector<User *> user_list;  //从json文件读取的用户信息
+    void logIn();   //登录至主窗口，由登录按钮触发
+    void signUp();  //注册账户，由注册按钮触发
 public:
     explicit Login(MainWindow *w, QWidget *parent = nullptr);
-    void setDefaultAndShow();
+    void setDefaultAndShow();   //展示登陆界面并恢复默认状态
     ~Login();
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *ev);
+    virtual void keyPressEvent(QKeyEvent *ev);  //重载键盘时间
 
 signals:
-    void loggedIn(User *now_user);
 
 };
 
