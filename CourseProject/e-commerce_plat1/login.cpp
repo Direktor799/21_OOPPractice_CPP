@@ -127,7 +127,7 @@ void Login::signUp()
         return;
     }
     for (auto i = user_list.begin(); i < user_list.end(); i++)
-        if ((*i)->getUserName() == username_trying && (*i)->getUserType() == usertype_trying)
+        if ((*i)->getUserName() == username_trying)
         {
             error_text->setText("用户名已存在");
             error_text->setStyleSheet("color:#ff0000;");

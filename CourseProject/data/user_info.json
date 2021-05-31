@@ -1,12 +1,6 @@
 {
     "user_info": [
         {
-            "balance": 0,
-            "password": "12",
-            "type": "Buyer",
-            "username": "12"
-        },
-        {
             "balance": 99.99000000000001,
             "password": "12",
             "type": "Seller",
