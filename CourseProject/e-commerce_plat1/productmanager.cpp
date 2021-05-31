@@ -4,7 +4,7 @@ ProductDisplayer::ProductDisplayer(QVector<Product *> &list, int index, QWidget 
 {
     setAttribute(Qt::WA_QuitOnClose,false);
     setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(250, 200);
+    setFixedSize(250, 230);
     setWindowTitle("商品信息");
 
     product_name_text = new QLabel("商品名称: " + product_list[now_index]->getName(), this);
@@ -31,14 +31,22 @@ ProductDisplayer::ProductDisplayer(QVector<Product *> &list, int index, QWidget 
     product_amount_text->setWordWrap(true);
     product_amount_text->setFixedSize(210,25);
     product_amount_text->move(20, 162);
+
+    product_seller_text = new QLabel("商家: " + product_list[now_index]->getSellerName(), this);
+    product_seller_text->setWordWrap(true);
+    product_seller_text->setFixedSize(210,25);
+    product_seller_text->move(20, 192);
+
     show();
 }
 
-ProductDiscounter::ProductDiscounter(QVector<Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
+ProductDiscounter::ProductDiscounter(User *user, QVector<Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
 {
+    now_user = user;
+
     setAttribute(Qt::WA_QuitOnClose,false);
     setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(250, 200);
+    setFixedSize(230, 120);
     setWindowTitle("商品打折");
 
     product_type_text = new QLabel("请选择打折品类:", this);
@@ -50,57 +58,40 @@ ProductDiscounter::ProductDiscounter(QVector<Product *> &list, QWidget *parent) 
     product_type_box->addItem("Clothing");
     product_type_box->setEditable(false);
     product_type_box->move(115, 10);
-    connect(product_type_box, &QComboBox::currentTextChanged, this, &ProductDiscounter::setSlider);
 
-    product_discount_text = new QLabel("请选择打折幅度:", this);
+    product_discount_text = new QLabel("请输入打折幅度:", this);
     product_discount_text->move(20, 42);
-    product_discount_slider = new QSlider(Qt::Horizontal, this);
-    product_discount_slider->setRange(0, 100);
-    product_discount_slider->setValue(Product::getDiscount());
-    product_discount_slider->move(115, 40);
+    product_discount_box = new QLineEdit(this);
+    QRegularExpression rx("^(100|[0-9]?\\d)$");
+    product_discount_box->setValidator(new QRegularExpressionValidator(rx, this));
+    product_discount_box->setMaxLength(3);
+    product_discount_box->setFixedSize(50, 20);
+    product_discount_box->move(115, 40);
 
-    value_text = new QLabel(QString::number(product_discount_slider->value()), this);
-    value_text->move(210, 42);
-    connect(product_discount_slider, &QSlider::valueChanged, this, &ProductDiscounter::displaySliderValue);
-    connect(product_discount_slider, &QSlider::valueChanged, this, &ProductDiscounter::discountProduct);
+    submit_btn = new QPushButton("提交", this);
+    submit_btn->move(80, 80);
+    connect(submit_btn, &QPushButton::clicked, this, &ProductDiscounter::discountProduct);
+
     show();
-}
-
-void ProductDiscounter::setSlider(const QString &s)
-{
-    if (s == "Book")
-        product_discount_slider->setValue(BookProduct::getDiscount());
-    else if (s == "Electronic")
-        product_discount_slider->setValue(ElectronicProduct::getDiscount());
-    else if (s == "Clothing")
-        product_discount_slider->setValue(ClothingProduct::getDiscount());
-    else if (s == "All")
-        product_discount_slider->setValue(Product::getDiscount());
-}
-
-void ProductDiscounter::displaySliderValue(int value)
-{
-    value_text->setText(QString::number(value));
-    value_text->adjustSize();
 }
 
 void ProductDiscounter::discountProduct()
 {
-    if (product_type_box->currentText() == "Book")
-        BookProduct::setDiscount(product_discount_slider->value());
-    else if (product_type_box->currentText() == "Electronic")
-        ElectronicProduct::setDiscount(product_discount_slider->value());
-    else if (product_type_box->currentText() == "Clothing")
-        ClothingProduct::setDiscount(product_discount_slider->value());
-    else if (product_type_box->currentText() == "All")
-        Product::setDiscount(product_discount_slider->value());
+    for (auto i = product_list.begin(); i < product_list.end(); i++)
+    {
+        if ((*i)->getSellerName() == now_user->getUserName() && ((*i)->getType() == product_type_box->currentText() || product_type_box->currentText() == "All"))
+            (*i)->setDiscount(product_discount_box->text().toInt());
+    }
+    close();
 }
 
-ProductManager::ProductManager(QVector<Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
+ProductManager::ProductManager(User *user, QVector<Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
 {
+    now_user = user;
+
     setAttribute(Qt::WA_QuitOnClose,false);
     setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(250, 250);
+    setFixedSize(250, 280);
 
     product_name_text = new QLabel("商品名称:", this);
     product_name_text->move(20, 12);
@@ -127,20 +118,29 @@ ProductManager::ProductManager(QVector<Product *> &list, QWidget *parent) : QWid
     product_price_text->move(20, 132);
     product_price_box = new QLineEdit(this);
     product_price_box->setValidator(new QDoubleValidator(0, 20000, 2, this));
-    product_price_box->setMaxLength(10);
+    product_price_box->setMaxLength(6);
     product_price_box->setFixedSize(80, 20);
     product_price_box->move(80, 132);
 
+    product_discount_text = new QLabel("商品折扣:", this);
+    product_discount_text->move(20, 162);
+    product_discount_box = new QLineEdit(this);
+    QRegularExpression rx("^(100|[0-9]?\\d)$");
+    product_discount_box->setValidator(new QRegularExpressionValidator(rx, this));
+    product_discount_box->setMaxLength(3);
+    product_discount_box->setFixedSize(50, 20);
+    product_discount_box->move(80, 162);
+
     product_amount_text = new QLabel("商品数量:", this);
-    product_amount_text->move(20, 162);
+    product_amount_text->move(20, 192);
     product_amount_box = new QLineEdit(this);
     product_amount_box->setValidator(new QIntValidator(0, 10000, this));
     product_amount_box->setMaxLength(10);
     product_amount_box->setFixedSize(80, 20);
-    product_amount_box->move(80, 162);
+    product_amount_box->move(80, 192);
 
     submit_btn = new QPushButton("提交", this);
-    submit_btn->move(90, 200);
+    submit_btn->move(90, 230);
 }
 
 void ProductManager::keyPressEvent(QKeyEvent *ev)
@@ -150,7 +150,7 @@ void ProductManager::keyPressEvent(QKeyEvent *ev)
     QWidget::keyPressEvent(ev);
 }
 
-ProductAdder::ProductAdder(QVector<Product *> &list, QWidget *parent) : ProductManager(list, parent)
+ProductAdder::ProductAdder(User *user, QVector<Product *> &list, QWidget *parent) : ProductManager(user, list , parent)
 {
     setWindowTitle("添加商品");
     connect(submit_btn, &QPushButton::clicked, this, &ProductAdder::addProduct);
@@ -163,22 +163,23 @@ void ProductAdder::addProduct()
     QString type = product_type_box->currentText();
     QString describe = product_describe_box->toPlainText();
     double price = product_price_box->text().toDouble();
+    int discount = product_discount_box->text().toInt();
     int amount = product_amount_box->text().toInt();
 
     Product *new_product;
     if (type == "Book")
-        new_product = new BookProduct(name, describe, price, amount);
+        new_product = new BookProduct(name, describe, price, discount, amount, now_user->getUserName());
     else if (type == "Electronic")
-        new_product = new ElectronicProduct(name, describe, price, amount);
+        new_product = new ElectronicProduct(name, describe, price, discount, amount, now_user->getUserName());
     else if (type == "Clothing")
-        new_product = new ClothingProduct(name, describe, price, amount);
+        new_product = new ClothingProduct(name, describe, price, discount, amount, now_user->getUserName());
     else
-        new_product = new Product(name, describe, price, amount);
+        new_product = new Product(name, describe, price, discount, amount, now_user->getUserName());
     product_list.push_back(new_product);
     close();
 }
 
-ProductModifier::ProductModifier(QVector<Product *> &list, int index, QWidget *parent) : ProductManager(list, parent), now_index(index)
+ProductModifier::ProductModifier(User *user, QVector<Product *> &list, int index, QWidget *parent) : ProductManager(user, list, parent), now_index(index)
 {
     setWindowTitle("修改商品");
     product_name_box->setText(product_list[now_index]->getName());
@@ -186,11 +187,12 @@ ProductModifier::ProductModifier(QVector<Product *> &list, int index, QWidget *p
     product_type_box->setDisabled(true);
     product_describe_box->setText(product_list[now_index]->getDescribe());
     product_price_box->setText(QString::number(product_list[now_index]->getOriginalPrice()));
+    product_discount_box->setText(QString::number(product_list[now_index]->getDiscount()));
     product_amount_box->setText(QString::number(product_list[now_index]->getAmount()));
-    submit_btn->move(45, 200);
+    submit_btn->move(45, 230);
     connect(submit_btn, &QPushButton::clicked, this, &ProductModifier::modifyProduct);
     stop_sale_btn = new QPushButton("下架", this);
-    stop_sale_btn->move(135, 200);
+    stop_sale_btn->move(135, 230);
     connect(stop_sale_btn, &QPushButton::clicked, this, &ProductModifier::deleteProduct);
     show();
 }
@@ -200,10 +202,12 @@ void ProductModifier::modifyProduct()
     QString name = product_name_box->text();
     QString describe = product_describe_box->toPlainText();
     double price = product_price_box->text().toDouble();
+    int discount = product_discount_box->text().toInt();
     int amount = product_amount_box->text().toInt();
     product_list[now_index]->setName(name);
     product_list[now_index]->setDescribe(describe);
     product_list[now_index]->setOriginalPrice(price);
+    product_list[now_index]->setDiscount(discount);
     product_list[now_index]->setAmount(amount);
     close();
 }
@@ -261,8 +265,15 @@ ProductScreenerWidget::ProductScreenerWidget(QTableWidget *table, QWidget *paren
     upper_price->move(110, 100);
     connect(upper_price, &QLineEdit::textChanged, this, &ProductScreenerWidget::changeScreen);
 
+    seller_text = new QLabel("商家:", this);
+    seller_text->move(10, 130);
+    seller_box = new QLineEdit(this);
+    seller_box->setFixedSize(120, 20);
+    seller_box->move(40, 130);
+    connect(seller_box, &QLineEdit::textChanged, this, &ProductScreenerWidget::changeScreen);
+
     on_stock = new QCheckBox("只看有货", this);
-    on_stock->move(40, 130);
+    on_stock->move(40, 160);
     connect(on_stock, &QCheckBox::stateChanged, this, &ProductScreenerWidget::changeScreen);
 }
 
@@ -280,7 +291,10 @@ void ProductScreenerWidget::changeScreen()
                     if (upper_price->text() == "" || table_widget->item(i, 2)->data(Qt::DisplayRole).toDouble() <= upper_price->text().toDouble())
                     {
                         if (!on_stock->isChecked() || table_widget->item(i, 3)->data(Qt::DisplayRole).toInt() > 0)
-                            continue;
+                        {
+                            if (table_widget->item(i, 4)->text().contains(seller_box->text(), Qt::CaseInsensitive))
+                                continue;
+                        }
                     }
                 }
             }
@@ -315,32 +329,26 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     {
         Product *new_product;
         QString name = array[i].toObject()["name"].toString();
-        QString type = array[i].toObject()["type"].toString();
         QString describe = array[i].toObject()["describe"].toString();
         double price = array[i].toObject()["price"].toDouble();
+        int discount = array[i].toObject()["discount"].toInt();
         int amount = array[i].toObject()["amount"].toInt();
+        QString sellername = array[i].toObject()["sellername"].toString();
+        QString type = array[i].toObject()["type"].toString();
         if (type == "Book")
-            new_product = new BookProduct(name, describe, price, amount);
+            new_product = new BookProduct(name, describe, price, discount, amount, sellername);
         else if (type == "Electronic")
-            new_product = new ElectronicProduct(name, describe, price, amount);
+            new_product = new ElectronicProduct(name, describe, price, discount, amount, sellername);
         else if (type == "Clothing")
-            new_product = new ClothingProduct(name, describe, price, amount);
+            new_product = new ClothingProduct(name, describe, price, discount, amount, sellername);
         else
-            new_product = new Product(name, describe, price, amount);
+            new_product = new Product(name, describe, price, discount, amount, sellername);
         product_list.push_back(new_product);
     }
-    int discount = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("all_discount")).toInt();
-    Product::setDiscount(discount);
-    discount = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("book_discount")).toInt();
-    BookProduct::setDiscount(discount);
-    discount = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("electronic_discount")).toInt();
-    ElectronicProduct::setDiscount(discount);
-    discount = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("clothing_discount")).toInt();
-    ClothingProduct::setDiscount(discount);
     product_file.close();
 
     //界面
-    table_widget = new QTableWidget(product_list.size(), 4, this);
+    table_widget = new QTableWidget(product_list.size(), 5, this);
     table_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -349,13 +357,14 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     table_widget->verticalHeader()->setHidden(true);
     table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
     connect(table_widget->horizontalHeader(), &QHeaderView::sortIndicatorChanged, table_widget, &QTableWidget::sortItems);
-    table_widget->setColumnWidth(0, 200);
+    table_widget->setColumnWidth(0, 190);
     table_widget->setColumnWidth(1, 100);
-    table_widget->setColumnWidth(2, 140);
+    table_widget->setColumnWidth(2, 90);
     table_widget->setColumnWidth(3, 60);
+    table_widget->setColumnWidth(4, 60);
     table_widget->setFixedSize(519, 476);
     QStringList header;
-    header << "商品名" << "类别" << "价格" << "数量";
+    header << "商品名" << "类别" << "价格" << "数量" << "商家";
     table_widget->setHorizontalHeaderLabels(header);
     table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
     refreshTable();
@@ -369,11 +378,8 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
         discount_product_btn = new QPushButton("商品打折", this);
         discount_product_btn->move(625, 452);
         connect(discount_product_btn, &QPushButton::clicked, this, &ProductManagerWidget::discountProduct);
-
-        connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::modifyProduct);
     }
-    else
-        connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::displayProduct);
+    connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::checkPermission);
 
     screener = new ProductScreenerWidget(table_widget, this);
     screener->move(520, 10);
@@ -399,6 +405,9 @@ void ProductManagerWidget::refreshTable()
         item->setData(Qt::DisplayRole, product_list[i]->getAmount());
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 3, item);
+        item = new QTableWidgetItem(product_list[i]->getSellerName());
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 4, item);
     }
     table_widget->horizontalHeader()->setSortIndicator(0,Qt::SortOrder::AscendingOrder);
 }
@@ -407,7 +416,7 @@ void ProductManagerWidget::addProduct()
 {
     if (product_adder == nullptr)
     {
-        product_adder = new ProductAdder(product_list);
+        product_adder = new ProductAdder(now_user, product_list);
         connect(product_adder, &ProductAdder::destroyed, this, &ProductManagerWidget::addProductDone);
     }
 }
@@ -418,15 +427,23 @@ void ProductManagerWidget::addProductDone()
     refreshTable();
 }
 
+void ProductManagerWidget::checkPermission(QTableWidgetItem *item)
+{
+    if (now_user != nullptr && now_user->getUserType() == "Seller" && now_user->getUserName() == table_widget->item(item->row(), 4)->text())
+        modifyProduct(item);
+    else
+        displayProduct(item);
+}
+
 void ProductManagerWidget::modifyProduct(QTableWidgetItem *item)
 {
     if (product_modifier == nullptr)
     {
         for (int i = 0; i < product_list.size(); i++)
         {
-            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text())
+            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text() && product_list[i]->getSellerName() == table_widget->item(item->row(), 4)->text())
             {
-                product_modifier = new ProductModifier(product_list, i);
+                product_modifier = new ProductModifier(now_user, product_list, i);
                 connect(product_modifier, &ProductModifier::destroyed, this, &ProductManagerWidget::modifyProductDone);
                 break;
             }
@@ -446,7 +463,7 @@ void ProductManagerWidget::displayProduct(QTableWidgetItem *item)
     {
         for (int i = 0; i < product_list.size(); i++)
         {
-            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text())
+            if (product_list[i]->getName() == table_widget->item(item->row(), 0)->text() && product_list[i]->getSellerName() == table_widget->item(item->row(), 4)->text())
             {
                 product_displayer = new ProductDisplayer(product_list, i);
                 connect(product_displayer, &ProductDisplayer::destroyed, this, &ProductManagerWidget::displayProductDone);
@@ -465,7 +482,7 @@ void ProductManagerWidget::discountProduct()
 {
     if (product_discounter == nullptr)
     {
-        product_discounter = new ProductDiscounter(product_list);
+        product_discounter = new ProductDiscounter(now_user, product_list);
         connect(product_discounter, &ProductDiscounter::destroyed, this, &ProductManagerWidget::discountProductDone);
     }
 }
@@ -492,15 +509,13 @@ ProductManagerWidget::~ProductManagerWidget()
         object["type"] = (*i)->getType();
         object["describe"] = (*i)->getDescribe();
         object["price"] = (*i)->getOriginalPrice();
+        object["discount"] = (*i)->getDiscount();
         object["amount"] = (*i)->getAmount();
+        object["sellername"] = (*i)->getSellerName();
         array.push_back(object);
     }
     QJsonObject object;
     object["product_info"] = array;
-    object["all_discount"] = Product::getDiscount();
-    object["book_discount"] = BookProduct::getDiscount();
-    object["electronic_discount"] = ElectronicProduct::getDiscount();
-    object["clothing_discount"] = ClothingProduct::getDiscount();
     QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Indented);
     product_file.write(data);
     product_file.close();

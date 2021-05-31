@@ -15,8 +15,8 @@
 #include <QTextEdit>
 #include <QComboBox>
 #include <QLabel>
-#include <QSlider>
 #include <QCheckBox>
+#include <QRegularExpression>
 #include "product.h"
 #include "user.h"
 
@@ -31,6 +31,7 @@ private:
     QLabel *product_describe_text;      //商品描述文本
     QLabel *product_price_text;         //商品价格文本
     QLabel *product_amount_text;        //商品数量文本
+    QLabel *product_seller_text;        //商家文本
 public:
     explicit ProductDisplayer(QVector<Product *> &list, int index, QWidget *parent = nullptr);
     virtual ~ProductDisplayer(){};
@@ -42,17 +43,17 @@ class ProductDiscounter : public QWidget    //商品打折窗口
 {
     Q_OBJECT
 private:
+    User *now_user;                     //当前用户指针
     QVector<Product *> &product_list;   //商品列表
     QLabel *product_type_text;          //商品类型提示文本
     QComboBox *product_type_box;        //商品类型选择框
     QLabel *product_discount_text;      //商品打折提示文本
-    QSlider *product_discount_slider;   //商品打折设置滑动条
-    QLabel *value_text;                 //商品打折幅度显示文本
-    void setSlider(const QString &s);   //根据选择的品类设置滑动条
+    QLineEdit *product_discount_box;    //商品打折输入框
+    QPushButton *submit_btn;            //提交按钮
     void displaySliderValue(int value); //根据滑动条内容显示数值
     void discountProduct();             //商品打折，由滑动条的改变触发
 public:
-    explicit ProductDiscounter(QVector<Product *> &list, QWidget *parent = nullptr);
+    explicit ProductDiscounter(User *user, QVector<Product *> &list, QWidget *parent = nullptr);
     virtual ~ProductDiscounter(){};
 signals:
 
@@ -62,6 +63,7 @@ class ProductManager : public QWidget   //商品管理窗口基类
 {
     Q_OBJECT
 protected:
+    User *now_user;                     //当前用户指针
     QVector<Product *> &product_list;   //商品列表
     QLabel *product_name_text;          //商品名称提示文本
     QLineEdit *product_name_box;        //商品名称输入框
@@ -71,12 +73,15 @@ protected:
     QTextEdit *product_describe_box;    //商品描述输入框
     QLabel *product_price_text;         //商品价格提示文本
     QLineEdit *product_price_box;       //商品价格输入框
+    QLabel *product_discount_text;      //商品折扣提示文本
+    QLineEdit *product_discount_box;    //商品折扣输入框
     QLabel *product_amount_text;        //商品数量提示文本
     QLineEdit *product_amount_box;      //商品数量输入框
+    QLabel *product_seller_text;        //商家提示文本
     QPushButton *submit_btn;            //提交按钮
     virtual void keyPressEvent(QKeyEvent *ev);  //重载键盘事件
 public:
-    explicit ProductManager(QVector<Product *> &list, QWidget *parent = nullptr);
+    explicit ProductManager(User *user, QVector<Product *> &list, QWidget *parent = nullptr);
     virtual ~ProductManager(){};
 signals:
 
@@ -88,7 +93,7 @@ class ProductAdder : public ProductManager  //商品添加窗口
 private:
     void addProduct();  //添加商品，由提交按钮触发
 public:
-    explicit ProductAdder(QVector<Product *> &list, QWidget *parent = nullptr);
+    explicit ProductAdder(User *user, QVector<Product *> &list, QWidget *parent = nullptr);
     virtual ~ProductAdder(){};
 signals:
 
@@ -103,7 +108,7 @@ private:
     void modifyProduct();       //修改商品信息，由提交按钮触发
     void deleteProduct();       //下架商品，由下架按钮触发
 public:
-    explicit ProductModifier(QVector<Product *> &list, int index, QWidget *parent = nullptr);
+    explicit ProductModifier(User *user, QVector<Product *> &list, int index, QWidget *parent = nullptr);
     virtual ~ProductModifier(){};
 signals:
 
@@ -123,6 +128,8 @@ private:
     QLineEdit *lower_price;         //商品价格下限输入框
     QLabel *mid_text;               //商品价格上下限之间提示文本
     QLineEdit *upper_price;         //商品价格上线输入框
+    QLabel *seller_text;            //商家提示文本
+    QLineEdit *seller_box;          //商家筛选输入框
     QCheckBox *on_stock;            //商品是否有货选择框
     void changeScreen();            //改变筛选条件，由此部件中筛选条件的改变触发
 public:
@@ -149,7 +156,8 @@ private:
     void refreshTable();                            //刷新商品展示列表
     void addProduct();                              //创建添加商品窗口，由添加商品按钮触发
     void addProductDone();                          //删除添加商品窗口
-    void modifyProduct(QTableWidgetItem *item);     //创建修改商品窗口，由修改商品按钮触发
+    void checkPermission(QTableWidgetItem *item);                         //权限检查，由双击展示列表中的商品触发
+    void modifyProduct(QTableWidgetItem *item);     //创建修改商品窗口，由双击展示列表中的商品触发
     void modifyProductDone();                       //删除修改商品窗口
     void displayProduct(QTableWidgetItem *item);    //创建商品展示窗口，由双击展示列表中的商品触发
     void displayProductDone();                      //删除商品展示窗口

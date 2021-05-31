@@ -21,7 +21,7 @@ class Login : public QWidget
 {
     Q_OBJECT
 private:
-    MainWindow *now_window;     //现在
+    MainWindow *now_window;     //主窗口指针
     QLineEdit *username_box;    //用户名输入框
     QLabel *username_text;      //用户名输入提示文本
     QLineEdit *password_box;    //密码输入框

@@ -1,17 +1,14 @@
 #include "product.h"
 
-int Product::discount_ratio;
-int BookProduct::discount_ratio;
-int ElectronicProduct::discount_ratio;
-int ClothingProduct::discount_ratio;
-
-Product::Product(QString name, QString describe, double price, int amount, QString type)
+Product::Product(QString name, QString describe, double price, int discount, int amount, QString sellername, QString type)
 {
     m_name = name;
     m_type = type;
     m_describe= describe;
     m_price = price;
+    m_discount = discount;
     m_amount = amount;
+    m_sellername = sellername;
 }
 
 void Product::setName(const QString new_name)
@@ -64,72 +61,40 @@ int Product::getAmount() const
     return m_amount;
 }
 
-int Product::getDiscount()
+int Product::getDiscount() const
 {
-    return discount_ratio;
+    return m_discount;
 }
 
 void Product::setDiscount(const int new_discount)
 {
-    discount_ratio = new_discount;
+    m_discount = new_discount;
 }
 
-BookProduct::BookProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Book")
+QString Product::getSellerName() const
+{
+    return m_sellername;
+}
+
+void Product::setSellerName(const QString seller_name)
+{
+    m_sellername = seller_name;
+}
+
+BookProduct::BookProduct(QString name, QString describe, double price, int discount, int amount, QString sellername)
+    : Product(name, describe, price, discount, amount, sellername, "Book")
 {
 
 }
 
-double BookProduct::getPrice() const
-{
-    return Product::getPrice() * getDiscount() / 100;
-}
-
-int BookProduct::getDiscount()
-{
-    return discount_ratio;
-}
-
-void BookProduct::setDiscount(const int new_discount)
-{
-    discount_ratio = new_discount;
-}
-
-ElectronicProduct::ElectronicProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Electronic")
+ElectronicProduct::ElectronicProduct(QString name, QString describe, double price, int discount, int amount, QString sellername)
+    : Product(name, describe, price, discount, amount, sellername, "Electronic")
 {
 
 }
 
-double ElectronicProduct::getPrice() const
-{
-    return Product::getPrice() * getDiscount() / 100;
-}
-
-int ElectronicProduct::getDiscount()
-{
-    return discount_ratio;
-}
-
-void ElectronicProduct::setDiscount(const int new_discount)
-{
-    discount_ratio = new_discount;
-}
-
-ClothingProduct::ClothingProduct(QString name, QString describe, double price, int amount) : Product(name, describe, price, amount, "Clothing")
+ClothingProduct::ClothingProduct(QString name, QString describe, double price, int discount, int amount, QString sellername)
+    : Product(name, describe, price, discount, amount, sellername, "Clothing")
 {
 
-}
-
-double ClothingProduct::getPrice() const
-{
-    return Product::getPrice() * getDiscount() / 100;
-}
-
-int ClothingProduct::getDiscount()
-{
-    return discount_ratio;
-}
-
-void ClothingProduct::setDiscount(const int new_discount)
-{
-    discount_ratio = new_discount;
 }
