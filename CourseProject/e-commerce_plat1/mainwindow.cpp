@@ -3,7 +3,7 @@
 MainWindow::MainWindow(User *user, QWidget *parent) : QMainWindow(parent)
 {
     setAttribute(Qt::WA_DeleteOnClose);
-    setFixedSize(1000, 600);
+    setFixedSize(700, 500);
 
     now_user = user;
     account_manager_bar = new AccountManagerBar(now_user, this);

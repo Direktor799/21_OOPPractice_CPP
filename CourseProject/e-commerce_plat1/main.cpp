@@ -10,5 +10,6 @@ int main(int argc, char *argv[])
     l->hide();
     w->show();
     int ret_value = a.exec();
+    l->~Login();
     return ret_value;
 }

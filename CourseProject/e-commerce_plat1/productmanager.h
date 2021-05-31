@@ -16,6 +16,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QSlider>
+#include <QCheckBox>
 #include "product.h"
 #include "user.h"
 
@@ -108,6 +109,29 @@ signals:
 
 };
 
+class ProductScreenerWidget : public QWidget
+{
+    Q_OBJECT
+private:
+    QTableWidget *table_widget;
+    QLabel *title_text;
+    QLabel *name_text;
+    QLineEdit *name_box;
+    QLabel *type_text;
+    QComboBox *type_box;
+    QLabel *price_text;
+    QLineEdit *lower_price;
+    QLabel *mid_text;
+    QLineEdit *upper_price;
+    QCheckBox *on_stock;
+    void changeScreen();
+public:
+    explicit ProductScreenerWidget(QTableWidget *table, QWidget *parent = nullptr);
+    virtual ~ProductScreenerWidget(){};
+signals:
+
+};
+
 class ProductManagerWidget : public QWidget
 {
     Q_OBJECT
@@ -121,6 +145,7 @@ private:
     ProductModifier *product_modifier;
     ProductDisplayer *product_displayer;
     ProductDiscounter *product_discounter;
+    ProductScreenerWidget *screener;
     void refreshTable();
     void addProduct();
     void addProductDone();

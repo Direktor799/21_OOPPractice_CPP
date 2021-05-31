@@ -22,7 +22,7 @@ ProductDisplayer::ProductDisplayer(QVector<Product *> &list, int index, QWidget 
     product_describe_text->setFixedSize(210,50);
     product_describe_text->move(20, 62);
 
-    product_price_text = new QLabel("商品价格: " + QString::number(product_list[now_index]->getPrice()), this);
+    product_price_text = new QLabel("商品价格: " + QString::number(product_list[now_index]->getPrice(), 'f', 2), this);
     product_price_text->setWordWrap(true);
     product_price_text->setFixedSize(210,25);
     product_price_text->move(20, 132);
@@ -44,10 +44,10 @@ ProductDiscounter::ProductDiscounter(QVector<Product *> &list, QWidget *parent) 
     product_type_text = new QLabel("请选择打折品类:", this);
     product_type_text->move(20, 12);
     product_type_box = new QComboBox(this);
+    product_type_box->addItem("All");
     product_type_box->addItem("Book");
     product_type_box->addItem("Electronic");
     product_type_box->addItem("Clothing");
-    product_type_box->addItem("All");
     product_type_box->setEditable(false);
     product_type_box->move(115, 10);
     connect(product_type_box, &QComboBox::currentTextChanged, this, &ProductDiscounter::setSlider);
@@ -56,10 +56,10 @@ ProductDiscounter::ProductDiscounter(QVector<Product *> &list, QWidget *parent) 
     product_discount_text->move(20, 42);
     product_discount_slider = new QSlider(Qt::Horizontal, this);
     product_discount_slider->setRange(0, 100);
-    product_discount_slider->setValue(BookProduct::getDiscount());
+    product_discount_slider->setValue(Product::getDiscount());
     product_discount_slider->move(115, 40);
 
-    value_text = new QLabel(QString::number(BookProduct::getDiscount()), this);
+    value_text = new QLabel(QString::number(product_discount_slider->value()), this);
     value_text->move(210, 42);
     connect(product_discount_slider, &QSlider::valueChanged, this, &ProductDiscounter::displaySliderValue);
     connect(product_discount_slider, &QSlider::valueChanged, this, &ProductDiscounter::discountProduct);
@@ -214,8 +214,85 @@ void ProductModifier::deleteProduct()
     close();
 }
 
+ProductScreenerWidget::ProductScreenerWidget(QTableWidget *table, QWidget *parent) : QWidget(parent)
+{
+    setFixedSize(180, 300);
+
+    table_widget = table;
+
+    title_text = new QLabel("———商品筛选———", this);
+    title_text->move(32, 10);
+
+    name_text = new QLabel("名称:", this);
+    name_text->move(10, 40);
+    name_box = new QLineEdit(this);
+    name_box->setFixedSize(120, 20);
+    name_box->move(40, 38);
+    connect(name_box, &QLineEdit::textChanged, this, &ProductScreenerWidget::changeScreen);
+
+    type_text = new QLabel("类型:", this);
+    type_text->move(10, 70);
+    type_box = new QComboBox(this);
+    type_box->addItem("All");
+    type_box->addItem("Book");
+    type_box->addItem("Electronic");
+    type_box->addItem("Clothing");
+    type_box->setEditable(false);
+    type_box->move(40, 68);
+    connect(type_box, &QComboBox::currentTextChanged, this, &ProductScreenerWidget::changeScreen);
+
+    price_text = new QLabel("价格:", this);
+    price_text->move(10, 100);
+
+    lower_price = new QLineEdit(this);
+    lower_price->setValidator(new QDoubleValidator(0, 10000, 2, this));
+    lower_price->setMaxLength(10);
+    lower_price->setFixedSize(50, 20);
+    lower_price->move(40, 100);
+    connect(lower_price, &QLineEdit::textChanged, this, &ProductScreenerWidget::changeScreen);
+
+    mid_text = new QLabel("~", this);
+    mid_text->move(95, 100);
+
+    upper_price = new QLineEdit(this);
+    upper_price->setValidator(new QDoubleValidator(0, 10000, 2, this));
+    upper_price->setMaxLength(10);
+    upper_price->setFixedSize(50, 20);
+    upper_price->move(110, 100);
+    connect(upper_price, &QLineEdit::textChanged, this, &ProductScreenerWidget::changeScreen);
+
+    on_stock = new QCheckBox("只看有货", this);
+    on_stock->move(40, 130);
+    connect(on_stock, &QCheckBox::stateChanged, this, &ProductScreenerWidget::changeScreen);
+}
+
+void ProductScreenerWidget::changeScreen()
+{
+    for (int i = 0; i < table_widget->rowCount(); i++)
+    {
+        table_widget->showRow(i);
+        if (table_widget->item(i, 0)->text().contains(name_box->text(), Qt::CaseInsensitive))
+        {
+            if (type_box->currentText() == "All"  || type_box->currentText() ==table_widget->item(i, 1)->text())
+            {
+                if (table_widget->item(i, 2)->data(Qt::DisplayRole).toDouble() >= lower_price->text().toDouble())
+                {
+                    if (upper_price->text() == "" || table_widget->item(i, 2)->data(Qt::DisplayRole).toDouble() <= upper_price->text().toDouble())
+                    {
+                        if (!on_stock->isChecked() || table_widget->item(i, 3)->data(Qt::DisplayRole).toInt() > 0)
+                            continue;
+                    }
+                }
+            }
+        }
+        table_widget->hideRow(i);
+    }
+}
+
 ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidget(parent)
 {
+    setFixedSize(700, 575);
+
     now_user = user;
     product_adder = nullptr;
     product_modifier = nullptr;
@@ -263,19 +340,20 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     product_file.close();
 
     //界面
-    table_widget = new QTableWidget(10000, 4, this);
+    table_widget = new QTableWidget(product_list.size(), 4, this);
     table_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
     table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
     table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
     table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     table_widget->horizontalHeader()->setSortIndicatorShown(true);
     table_widget->verticalHeader()->setHidden(true);
+    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
     connect(table_widget->horizontalHeader(), &QHeaderView::sortIndicatorChanged, table_widget, &QTableWidget::sortItems);
     table_widget->setColumnWidth(0, 200);
     table_widget->setColumnWidth(1, 100);
-    table_widget->setColumnWidth(2, 100);
-    table_widget->setColumnWidth(3, 100);
-    table_widget->setFixedSize(519, 450);
+    table_widget->setColumnWidth(2, 140);
+    table_widget->setColumnWidth(3, 60);
+    table_widget->setFixedSize(519, 476);
     QStringList header;
     header << "商品名" << "类别" << "价格" << "数量";
     table_widget->setHorizontalHeaderLabels(header);
@@ -285,11 +363,11 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     if (now_user != nullptr && now_user->getUserType() == "Seller")
     {
         add_product_btn = new QPushButton("添加商品", this);
-        add_product_btn->move(600, 100);
+        add_product_btn->move(550, 452);
         connect(add_product_btn, &QPushButton::clicked, this, &ProductManagerWidget::addProduct);
 
         discount_product_btn = new QPushButton("商品打折", this);
-        discount_product_btn->move(600, 150);
+        discount_product_btn->move(625, 452);
         connect(discount_product_btn, &QPushButton::clicked, this, &ProductManagerWidget::discountProduct);
 
         connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::modifyProduct);
@@ -297,12 +375,13 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     else
         connect(table_widget, &QTableWidget::itemDoubleClicked, this, &ProductManagerWidget::displayProduct);
 
-    setFixedSize(900, 450);
-
+    screener = new ProductScreenerWidget(table_widget, this);
+    screener->move(520, 10);
 }
 
 void ProductManagerWidget::refreshTable()
 {
+    table_widget->setRowCount(product_list.size());
     table_widget->clearContents();
     for (int i = 0; i < product_list.size(); i++)
     {

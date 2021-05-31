@@ -12,7 +12,7 @@
             "type": "Book"
         },
         {
-            "amount": 1,
+            "amount": 3,
             "describe": "你买不到的好货",
             "name": "GTX3080Ti",
             "price": 12000,
@@ -26,74 +26,32 @@
             "type": "Clothing"
         },
         {
-            "amount": 10,
-            "describe": "王小波世界第一",
-            "name": "《沉默的大多数》",
-            "price": 20,
-            "type": "Book"
-        },
-        {
-            "amount": 50,
+            "amount": 1000,
             "describe": "程序员的人文情怀",
             "name": "《月亮与六便士》",
             "price": 20,
             "type": "Book"
         },
         {
-            "amount": 1111,
-            "describe": "11",
-            "name": "1",
-            "price": 100,
-            "type": "None"
+            "amount": 0,
+            "describe": "绝版了兄弟",
+            "name": "耶稣的裹尸布",
+            "price": 999999,
+            "type": "Clothing"
         },
         {
-            "amount": 3,
-            "describe": "3",
-            "name": "3",
-            "price": 3,
+            "amount": 500,
+            "describe": "也就和霍金五五开",
+            "name": "《禅与摩托车维修艺术》",
+            "price": 40,
             "type": "Book"
         },
         {
-            "amount": 4,
-            "describe": "4",
-            "name": "4",
-            "price": 4,
-            "type": "Book"
-        },
-        {
-            "amount": 5,
-            "describe": "5",
-            "name": "5",
-            "price": 5,
-            "type": "Book"
-        },
-        {
-            "amount": 6,
-            "describe": "6",
-            "name": "6",
-            "price": 6,
-            "type": "Book"
-        },
-        {
-            "amount": 7,
-            "describe": "7",
-            "name": "7",
-            "price": 7,
-            "type": "Book"
-        },
-        {
-            "amount": 8,
-            "describe": "8",
-            "name": "8",
-            "price": 8,
-            "type": "Book"
-        },
-        {
-            "amount": 9,
-            "describe": "9",
-            "name": "9",
-            "price": 9,
-            "type": "Book"
+            "amount": 1,
+            "describe": "有钱买没命玩",
+            "name": "朱迪的超梦设备",
+            "price": 9999,
+            "type": "Electronic"
         }
     ]
 }
