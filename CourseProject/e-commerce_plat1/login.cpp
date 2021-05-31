@@ -99,6 +99,7 @@ void Login::logIn()
                 error_text->adjustSize();
                 error_text->show();
             }
+            break;
         }
         else
         {
