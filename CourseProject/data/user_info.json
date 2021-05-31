@@ -29,6 +29,12 @@
             "password": "sj",
             "type": "Seller",
             "username": "sj"
+        },
+        {
+            "balance": 0,
+            "password": "1",
+            "type": "Buyer",
+            "username": "111111111111111111"
         }
     ]
 }
