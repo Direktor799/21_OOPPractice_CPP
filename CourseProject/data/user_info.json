@@ -1,19 +1,19 @@
 {
     "user_info": [
         {
-            "balance": 99.99000000000001,
+            "balance": 84871.99,
             "password": "12",
             "type": "Seller",
             "username": "12"
         },
         {
-            "balance": 325.33,
+            "balance": 915792.33,
             "password": "1",
             "type": "Buyer",
             "username": "1"
         },
         {
-            "balance": 0,
+            "balance": 101,
             "password": "test",
             "type": "Buyer",
             "username": "test"
@@ -35,6 +35,12 @@
             "password": "1",
             "type": "Buyer",
             "username": "111111111111111111"
+        },
+        {
+            "balance": 0,
+            "password": "0",
+            "type": "Buyer",
+            "username": "0"
         }
     ]
 }

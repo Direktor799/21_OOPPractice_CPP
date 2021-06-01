@@ -2,10 +2,6 @@
 #define PRODUCTMANAGER_H
 
 #include <QWidget>
-#include <QDir>
-#include <QJsonDocument>
-#include <QJsonObject>
-#include <QJsonArray>
 #include <QTableWidget>
 #include <QPushButton>
 #include <QHeaderView>
@@ -149,7 +145,7 @@ class ProductManagerWidget : public QWidget //商品管理部件
     Q_OBJECT
 private:
     User *now_user;                         //当前用户指针
-    QVector <Product *> product_list;       //商品列表
+    QVector<Product *> &product_list;      //商品列表
     QTableWidget *table_widget;             //商品展示列表
     QPushButton *add_product_btn;           //添加商品按钮
     QPushButton *discount_product_btn;      //商品打折按钮
@@ -158,10 +154,9 @@ private:
     ProductDisplayer *product_displayer;    //展示商品窗口
     ProductDiscounter *product_discounter;  //商品打折窗口
     ProductScreenerWidget *screener;        //商品筛选部件
-    void refreshTable();                            //刷新商品展示列表
     void addProduct();                              //创建添加商品窗口，由添加商品按钮触发
     void addProductDone();                          //删除添加商品窗口
-    void checkPermission(QTableWidgetItem *item);                         //权限检查，由双击展示列表中的商品触发
+    void checkPermission(QTableWidgetItem *item);   //权限检查，由双击展示列表中的商品触发
     void modifyProduct(QTableWidgetItem *item);     //创建修改商品窗口，由双击展示列表中的商品触发
     void modifyProductDone();                       //删除修改商品窗口
     void displayProduct(QTableWidgetItem *item);    //创建商品展示窗口，由双击展示列表中的商品触发
@@ -171,7 +166,8 @@ private:
 
     void recvAddToCart(Product * product, int amount);
 public:
-    explicit ProductManagerWidget(User *user, QWidget *parent = nullptr);
+    void refresh();                            //刷新商品展示列表
+    explicit ProductManagerWidget(User *user, QVector <Product *> &list, QWidget *parent = nullptr);
     ~ProductManagerWidget();
 signals:
     void addToCart(Product * product, int amount);

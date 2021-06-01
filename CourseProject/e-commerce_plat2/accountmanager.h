@@ -73,6 +73,7 @@ private:
     void topUpWalletDone();     //删除余额充值窗口
     void changeUser();          //切换到登陆界面
 public:
+    void refresh();
     explicit AccountManagerBar(User *user, QWidget *parent = nullptr);
 signals:
     void toLogin(); //切换到登陆界面的信号

@@ -1,8 +1,11 @@
 #include "transactionmanager.h"
 
-TransactionManagerWidget::TransactionManagerWidget(User *user, QWidget *parent) : QWidget(parent)
+TransactionManagerWidget::TransactionManagerWidget(User *user, QVector<User *> &ulist, QVector<Product *> &plist, QVector<QPair<Product *, int> > &clist, QVector<Order> &olist, QWidget *parent)
+    : QWidget(parent), user_list(ulist), product_list(plist), cart_list(clist), order_list(olist)
 {
     now_user = user;
+    cart_manager = nullptr;
+    order_manager = nullptr;
 
     setFixedSize(280, 100);
 
@@ -10,9 +13,10 @@ TransactionManagerWidget::TransactionManagerWidget(User *user, QWidget *parent) 
     {
         cart_btn = new QPushButton("购物车", this);
         cart_btn->move(10, 0);
-        connect(cart_btn, &QPushButton::clicked, this, &TransactionManagerWidget::OpenCart);
+        connect(cart_btn, &QPushButton::clicked, this, &TransactionManagerWidget::openCart);
         order_btn = new QPushButton("我的订单", this);
         order_btn->move(95, 0);
+        connect(order_btn, &QPushButton::clicked, this, &TransactionManagerWidget::openOrderManager);
     }
     else if (now_user->getUserType() == "Seller")
     {
@@ -21,15 +25,57 @@ TransactionManagerWidget::TransactionManagerWidget(User *user, QWidget *parent) 
     }
 }
 
-void TransactionManagerWidget::OpenCart()
+void TransactionManagerWidget::openCart()
 {
-    new TransactionManager(now_user, cart_list);
+    if (cart_manager == nullptr)
+    {
+        cart_manager = new CartManager(now_user, cart_list);
+        connect(cart_manager, &CartManager::destroyed, this, &TransactionManagerWidget::closeCart);
+        connect(cart_manager, &CartManager::makeOrder, this, &TransactionManagerWidget::recvMakeOrder);
+    }
 }
 
-void TransactionManagerWidget::CloseCart()
+void TransactionManagerWidget::closeCart()
 {
+    cart_manager = nullptr;
 }
 
+void TransactionManagerWidget::recvMakeOrder()
+{
+    Order new_order;
+    for (auto i = cart_list.begin(); i < cart_list.end(); i++)
+        if (i->first->getAmount() - i->second < 0)
+        {
+            QErrorMessage *error = new QErrorMessage();
+            error->showMessage("商品余量不足，订单生成失败");
+            return;
+        }
+    for (auto i = cart_list.begin(); i < cart_list.end(); i++)
+    {
+        new_order.list.push_back(qMakePair(*(i->first), i->second));
+        i->first->setAmount(i->first->getAmount() - i->second);     //冻结
+    }
+    new_order.buying_time = QDateTime::currentDateTime();
+    new_order.is_purchased = false;
+    order_list.push_front(new_order);
+    cart_list.clear();
+    emit refreshNow();
+}
+
+void TransactionManagerWidget::openOrderManager()
+{
+    if (order_manager == nullptr)
+    {
+        order_manager = new OrderManager(now_user, user_list, order_list);
+        connect(order_manager, &OrderManager::destroyed, this, &TransactionManagerWidget::closeOrderManager);
+        connect(order_manager, &OrderManager::refreshSignal, this, &TransactionManagerWidget::recvRefreshSignal);
+    }
+}
+
+void TransactionManagerWidget::closeOrderManager()
+{
+    order_manager = nullptr;
+}
 
 void TransactionManagerWidget::recvAddToCart(Product *product, int amount)
 {
@@ -44,8 +90,17 @@ void TransactionManagerWidget::recvAddToCart(Product *product, int amount)
         cart_list.push_back(qMakePair(product, amount));
 }
 
+void TransactionManagerWidget::recvRefreshSignal()
+{
+    emit refreshNow();
+}
 
-TransactionManager::TransactionManager(User *user, QVector<QPair<Product *, int> > &list, QWidget *parent)
+TransactionManagerWidget::~TransactionManagerWidget()
+{
+
+}
+
+CartManager::CartManager(User *user, QVector<QPair<Product *, int> > &list, QWidget *parent)
     : QWidget(parent), my_list(list)
 {
     now_user = user;
@@ -88,22 +143,23 @@ TransactionManager::TransactionManager(User *user, QVector<QPair<Product *, int>
         table_widget->setItem(i, 1, item);
         QuantityWidget *quantity_widget = new QuantityWidget(1, my_list[i].first->getAmount());
         quantity_widget->setValue(my_list[i].second);
-        connect(quantity_widget, &QuantityWidget::valueChanged, this, &TransactionManager::refreshTotalPrice);
-        connect(quantity_widget, &QuantityWidget::valueChanged, this, &TransactionManager::updateCartList);
+        connect(quantity_widget, &QuantityWidget::valueChanged, this, &CartManager::refreshTotalPrice);
+        connect(quantity_widget, &QuantityWidget::valueChanged, this, &CartManager::updateCartList);
         table_widget->setCellWidget(i, 2, quantity_widget);
         item = new QTableWidgetItem(" ×");
         table_widget->setItem(i, 3, item);
     }
-    connect(table_widget, &QTableWidget::cellClicked, this, &TransactionManager::deleteProductInCart);
-    connect(table_widget, &QTableWidget::clicked, this, &TransactionManager::refreshTotalPrice);
+    connect(table_widget, &QTableWidget::cellClicked, this, &CartManager::deleteProductInCart);
+    connect(table_widget, &QTableWidget::clicked, this, &CartManager::refreshTotalPrice);
     refreshTotalPrice();
 
     submit_btn = new QPushButton("提交订单", this);
     submit_btn->move(280, 207);
+    connect(submit_btn, &QPushButton::clicked, this, &CartManager::sendMakeOrderSignal);
     show();
 }
 
-void TransactionManager::deleteProductInCart(int row, int col)
+void CartManager::deleteProductInCart(int row, int col)
 {
     if (col == 3)
     {
@@ -112,7 +168,7 @@ void TransactionManager::deleteProductInCart(int row, int col)
     }
 }
 
-void TransactionManager::refreshTotalPrice()
+void CartManager::refreshTotalPrice()
 {
     double total_price = 0;
     for (int i = 0; i < table_widget->rowCount(); i++)
@@ -121,10 +177,193 @@ void TransactionManager::refreshTotalPrice()
     total_price_text->adjustSize();
 }
 
-void TransactionManager::updateCartList()
+void CartManager::updateCartList()
 {
     for (int i = 0; i < table_widget->rowCount(); i++)
     {
         my_list[i].second = ((QuantityWidget *)table_widget->cellWidget(i, 2))->value();
     }
+}
+
+void CartManager::sendMakeOrderSignal()
+{
+    emit makeOrder();
+    close();
+}
+
+OrderDetail::OrderDetail(User *user, QVector<User *> &ulist, Order &order, QWidget *parent)
+    : QWidget(parent), user_list(ulist), now_order(order)
+{
+    now_user = user;
+    setAttribute(Qt::WA_QuitOnClose,false);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setFixedSize(329, 240);
+    setWindowTitle("订单详情");
+
+    QFont ft;
+    ft.setPointSize(10);
+    ft.setBold(true);
+    time_text = new QLabel(order.buying_time.toString(), this);
+    time_text->setFont(ft);
+    time_text->move(10, 7);
+
+    double total_price = 0;
+    for (auto j = now_order.list.begin(); j < now_order.list.end(); j++)
+        total_price += j->first.getPrice() * j->second;
+    total_price_text = new QLabel("金额总计:" + QString::number(total_price) + "元", this);
+    total_price_text->setFont(ft);
+    total_price_text->move(200, 7);
+
+    error_text = new QLabel(this);
+    error_text->setStyleSheet("color:red;");
+    error_text->setText("余额不足!");
+    error_text->move(180, 210);
+    error_text->hide();
+
+    table_widget = new QTableWidget(order.list.size(), 3, this);
+    table_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
+    table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table_widget->verticalHeader()->setHidden(true);
+    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    table_widget->setColumnWidth(0, 180);
+    table_widget->setColumnWidth(1, 70);
+    table_widget->setColumnWidth(2, 60);
+    table_widget->setFixedSize(329, 170);
+    table_widget->move(0, 30);
+    QStringList header;
+    header << "商品名" << "价格" << "数量";
+    table_widget->setHorizontalHeaderLabels(header);
+    table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
+    for (int i = 0; i < now_order.list.size(); i++)
+    {
+        QTableWidgetItem *item = new QTableWidgetItem(now_order.list[i].first.getName());
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 0, item);
+        item = new QTableWidgetItem(QString::number(now_order.list[i].first.getPrice()));
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 1, item);
+        item = new QTableWidgetItem(QString::number(now_order.list[i].second));
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 2, item);
+    }
+
+    if (!now_order.is_purchased)
+    {
+        cancel_btn = new QPushButton("取消订单", this);
+        cancel_btn->move(15, 207);
+
+        purchase_btn = new QPushButton("付款", this);
+        purchase_btn->move(240, 207);
+        connect(purchase_btn, &QPushButton::clicked, this, &OrderDetail::purchaseOrder);
+    }
+
+    show();
+}
+
+void OrderDetail::purchaseOrder()
+{
+    double total_price = 0;
+    for (auto i = now_order.list.begin(); i < now_order.list.end(); i++)
+        total_price += i->first.getPrice() * i->second;
+    if (now_user->getBalance() > total_price)
+    {
+        now_user->setBalance(now_user->getBalance() - total_price);
+        for (auto i = now_order.list.begin(); i < now_order.list.end(); i++)
+        {
+            for (auto j = user_list.begin(); j < user_list.end(); j++)
+            {
+                if ((*j)->getUserName() == i->first.getSellerName())
+                    (*j)->setBalance((*j)->getBalance() + i->first.getPrice() * i->second);
+            }
+        }
+        now_order.is_purchased = true;
+        close();
+    }
+    else
+    {
+        error_text->show();
+    }
+    emit refreshSignal();
+}
+
+OrderManager::OrderManager(User *user, QVector<User *> &ulist, QVector<Order> &olist, QWidget *parent)
+    : QWidget(parent), user_list(ulist), order_list(olist)
+{
+    now_user = user;
+    order_detail = nullptr;
+    setAttribute(Qt::WA_QuitOnClose,false);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setFixedSize(344, 220);
+    setWindowTitle("我的订单");
+
+    table_widget = new QTableWidget(order_list.size(), 3, this);
+    table_widget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+    table_widget->setSelectionMode(QAbstractItemView::SingleSelection);
+    table_widget->setSelectionBehavior(QAbstractItemView::SelectRows);
+    table_widget->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+    table_widget->verticalHeader()->setHidden(true);
+    table_widget->setVerticalScrollBarPolicy(Qt::ScrollBarPolicy::ScrollBarAlwaysOn);
+    table_widget->setColumnWidth(0, 180);
+    table_widget->setColumnWidth(1, 70);
+    table_widget->setColumnWidth(2, 75);
+    table_widget->setFixedSize(344, 200);
+    QStringList header;
+    header << "商品名" << "价格" << "状态";
+    table_widget->setHorizontalHeaderLabels(header);
+    table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
+    refreshAndSendRefreshSignal();
+    connect(table_widget, &QTableWidget::itemDoubleClicked, this, &OrderManager::openOrderDetail);
+
+    show();
+}
+
+void OrderManager::openOrderDetail(QTableWidgetItem *item)
+{
+    if (order_detail == nullptr)
+    {
+        order_detail = new OrderDetail(now_user, user_list, order_list[item->row()]);
+        connect(order_detail, &OrderDetail::destroyed, this, &OrderManager::closeOrderDetail);
+        connect(order_detail, &OrderDetail::refreshSignal, this, &OrderManager::refreshAndSendRefreshSignal);
+    }
+}
+
+void OrderManager::closeOrderDetail()
+{
+    order_detail = nullptr;
+}
+
+void OrderManager::refreshAndSendRefreshSignal()
+{
+    table_widget->setRowCount(order_list.size());
+    table_widget->clearContents();
+    for (int i = 0; i < order_list.size(); i++)
+    {
+        int product_count = 0;
+        double total_price = 0;
+        for (auto j = order_list[i].list.begin(); j < order_list[i].list.end(); j++)
+        {
+            product_count += j->second;
+            total_price += j->first.getPrice() * j->second;
+        }
+
+        QTableWidgetItem *item;
+        if (product_count == 1)
+            item = new QTableWidgetItem(order_list[i].list.front().first.getName());
+        else
+            item = new QTableWidgetItem(order_list[i].list.front().first.getName() + "等共" + QString::number(product_count) + "件商品");
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 0, item);
+        item = new QTableWidgetItem(QString::number(total_price));
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 1, item);
+        if (order_list[i].is_purchased)
+            item = new QTableWidgetItem("已付款");
+        else
+            item = new QTableWidgetItem("未付款");
+        item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
+        table_widget->setItem(i, 2, item);
+    }
+    emit refreshSignal();
 }

@@ -32,11 +32,11 @@ private:
     QButtonGroup *user_type_btngrp; //用户类别互斥按钮组
     QRadioButton *seller_btn;   //卖家选项
     QRadioButton *buyer_btn;    //卖家选项
-    QVector<User *> user_list;  //从json文件读取的用户信息
+    QVector<User *> &user_list;  //从json文件读取的用户信息
     void logIn();   //登录至主窗口，由登录按钮触发
     void signUp();  //注册账户，由注册按钮触发
 public:
-    explicit Login(MainWindow *w, QWidget *parent = nullptr);
+    explicit Login(MainWindow *w, QVector<User *> &ulist, QWidget *parent = nullptr);
     void setDefaultAndShow();   //展示登陆界面并恢复默认状态
     ~Login();
 

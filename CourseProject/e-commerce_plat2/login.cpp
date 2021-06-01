@@ -1,35 +1,9 @@
 #include "login.h"
 
-Login::Login(MainWindow *w, QWidget *parent) : QWidget(parent)
+Login::Login(MainWindow *w, QVector<User *> &ulist, QWidget *parent) : QWidget(parent), user_list(ulist)
 {
     now_window = w;
     connect(w, &MainWindow::toLogin, this, &Login::setDefaultAndShow);
-
-    //读取json数据并存入user_list
-    QDir info_dir = QDir::currentPath();
-    info_dir.cdUp();
-    info_dir.cd("data");
-    QFile user_file(info_dir.path() + "/user_info.json");
-    if(!user_file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QErrorMessage *error = new QErrorMessage();
-        error->showMessage("用户文件读取错误，程序退出");
-    }
-    QString value = user_file.readAll();
-    QJsonArray array = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("user_info")).toArray();
-    for (int i = 0; i < array.size(); i++)
-    {
-        User *new_user;
-        QString username = array[i].toObject()["username"].toString();
-        QString password = array[i].toObject()["password"].toString();
-        double balance = array[i].toObject()["balance"].toDouble();
-        if (array[i].toObject()["type"].toString() == "Seller")
-            new_user = new Seller(username, password, balance);
-        else
-            new_user = new Buyer(username, password, balance);
-        user_list.push_back(new_user);
-    }
-    user_file.close();
 
     //窗口布局
     setWindowTitle("登录");
@@ -88,7 +62,7 @@ void Login::logIn()
             if ((*i)->isPasswordCorrect(password_trying))
             {
                 error_text->hide();
-                now_window = new MainWindow(*i);
+                now_window = new MainWindow(*i, user_list);
                 connect(now_window, &MainWindow::toLogin, this, &Login::setDefaultAndShow);
                 now_window->show();
                 hide();
@@ -175,28 +149,5 @@ void Login::keyPressEvent(QKeyEvent *ev)
 
 Login::~Login()
 {
-    //保存用户信息
-    QDir info_dir = QDir::currentPath();
-    info_dir.cdUp();
-    info_dir.cd("data");
-    QFile user_file(info_dir.path() + "/user_info.json");
-    user_file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
-    QJsonArray array;
-    for (auto i = user_list.begin(); i < user_list.end(); i++)
-    {
-        QJsonObject object;
-        object["username"] = (*i)->getUserName();
-        object["password"] = (*i)->getPassword();
-        object["type"] = (*i)->getUserType();
-        object["balance"] = (*i)->getBalance();
-        array.push_back(object);
-    }
-    QJsonObject object;
-    object["user_info"] = array;
-    QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Indented);
-    user_file.write(data);
-    user_file.close();
-    //释放内存
-    for (auto i = user_list.begin(); i < user_list.end(); i++)
-        delete *i;
+
 }

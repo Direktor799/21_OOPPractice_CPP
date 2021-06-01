@@ -183,6 +183,11 @@ void AccountManagerBar::topUpWallet()
 void AccountManagerBar::topUpWalletDone()
 {
     wallet_top_uper = nullptr;
+    refresh();
+}
+
+void AccountManagerBar::refresh()
+{
     balance_text->setText("当前余额: " + QString::number(now_user->getBalance(), 'f', 2) + "元");
     balance_text->adjustSize();
 }

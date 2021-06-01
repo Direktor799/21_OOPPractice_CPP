@@ -322,7 +322,7 @@ void ProductScreenerWidget::changeScreen()
     }
 }
 
-ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidget(parent)
+ProductManagerWidget::ProductManagerWidget(User *user, QVector <Product *> &list, QWidget *parent) : QWidget(parent), product_list(list)
 {
     setFixedSize(700, 575);
 
@@ -331,40 +331,6 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     product_modifier = nullptr;
     product_displayer = nullptr;
     product_discounter = nullptr;
-
-    //读取json并存入product_list
-    QDir info_dir = QDir::currentPath();
-    info_dir.cdUp();
-    info_dir.cd("data");
-    QFile product_file(info_dir.path() + "/product_info.json");
-    if (!product_file.open(QIODevice::ReadOnly | QIODevice::Text))
-    {
-        QErrorMessage *error = new QErrorMessage();
-        error->showMessage("商品文件读取错误");
-    }
-    QString value = product_file.readAll();
-    QJsonArray array = QJsonDocument::fromJson(value.toUtf8()).object().value(QStringLiteral("product_info")).toArray();
-    for (int i = 0; i < array.size(); i++)
-    {
-        Product *new_product;
-        QString name = array[i].toObject()["name"].toString();
-        QString describe = array[i].toObject()["describe"].toString();
-        double price = array[i].toObject()["price"].toDouble();
-        int discount = array[i].toObject()["discount"].toInt();
-        int amount = array[i].toObject()["amount"].toInt();
-        QString sellername = array[i].toObject()["sellername"].toString();
-        QString type = array[i].toObject()["type"].toString();
-        if (type == "Book")
-            new_product = new BookProduct(name, describe, price, discount, amount, sellername);
-        else if (type == "Electronic")
-            new_product = new ElectronicProduct(name, describe, price, discount, amount, sellername);
-        else if (type == "Clothing")
-            new_product = new ClothingProduct(name, describe, price, discount, amount, sellername);
-        else
-            new_product = new Product(name, describe, price, discount, amount, sellername);
-        product_list.push_back(new_product);
-    }
-    product_file.close();
 
     //界面
     table_widget = new QTableWidget(product_list.size(), 5, this);
@@ -386,7 +352,7 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     header << "商品名" << "类别" << "价格" << "数量" << "商家";
     table_widget->setHorizontalHeaderLabels(header);
     table_widget->horizontalHeader()->setStyleSheet("QHeaderView::section{background:#dddddd;}");
-    refreshTable();
+    refresh();
 
     if (now_user != nullptr && now_user->getUserType() == "Seller")
     {
@@ -404,7 +370,7 @@ ProductManagerWidget::ProductManagerWidget(User *user, QWidget *parent) : QWidge
     screener->move(520, 10);
 }
 
-void ProductManagerWidget::refreshTable()
+void ProductManagerWidget::refresh()
 {
     table_widget->setRowCount(product_list.size());
     table_widget->clearContents();
@@ -443,7 +409,7 @@ void ProductManagerWidget::addProduct()
 void ProductManagerWidget::addProductDone()
 {
     product_adder = nullptr;
-    refreshTable();
+    refresh();
 }
 
 void ProductManagerWidget::checkPermission(QTableWidgetItem *item)
@@ -473,7 +439,7 @@ void ProductManagerWidget::modifyProduct(QTableWidgetItem *item)
 void ProductManagerWidget::modifyProductDone()
 {
     product_modifier = nullptr;
-    refreshTable();
+    refresh();
 }
 
 void ProductManagerWidget::displayProduct(QTableWidgetItem *item)
@@ -510,7 +476,7 @@ void ProductManagerWidget::discountProduct()
 void ProductManagerWidget::discountProductDone()
 {
     product_discounter = nullptr;
-    refreshTable();
+    refresh();
 }
 
 void ProductManagerWidget::recvAddToCart(Product * product, int amount)
@@ -520,31 +486,5 @@ void ProductManagerWidget::recvAddToCart(Product * product, int amount)
 
 ProductManagerWidget::~ProductManagerWidget()
 {
-    //保存商品信息
-    QDir info_dir = QDir::currentPath();
-    info_dir.cdUp();
-    info_dir.cd("data");
-    QFile product_file(info_dir.path() + "/product_info.json");
-    product_file.open(QIODevice::WriteOnly | QIODevice::Truncate | QIODevice::Text);
-    QJsonArray array;
-    for (auto i = product_list.begin(); i < product_list.end(); i++)
-    {
-        QJsonObject object;
-        object["name"] = (*i)->getName();
-        object["type"] = (*i)->getType();
-        object["describe"] = (*i)->getDescribe();
-        object["price"] = (*i)->getOriginalPrice();
-        object["discount"] = (*i)->getDiscount();
-        object["amount"] = (*i)->getAmount();
-        object["sellername"] = (*i)->getSellerName();
-        array.push_back(object);
-    }
-    QJsonObject object;
-    object["product_info"] = array;
-    QByteArray data = QJsonDocument(object).toJson(QJsonDocument::Indented);
-    product_file.write(data);
-    product_file.close();
-    //释放内存
-    for (auto i = product_list.begin(); i < product_list.end(); i++)
-        delete *i;
+
 }
