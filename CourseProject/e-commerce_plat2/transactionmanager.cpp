@@ -57,6 +57,7 @@ void TransactionManagerWidget::recvMakeOrder()
     }
     new_order.buying_time = QDateTime::currentDateTime();
     new_order.is_purchased = false;
+    new_order.is_canceled = false;
     order_list.push_front(new_order);
     cart_list.clear();
     emit refreshNow();
@@ -66,7 +67,7 @@ void TransactionManagerWidget::openOrderManager()
 {
     if (order_manager == nullptr)
     {
-        order_manager = new OrderManager(now_user, user_list, order_list);
+        order_manager = new OrderManager(now_user, user_list, product_list, order_list);
         connect(order_manager, &OrderManager::destroyed, this, &TransactionManagerWidget::closeOrderManager);
         connect(order_manager, &OrderManager::refreshSignal, this, &TransactionManagerWidget::recvRefreshSignal);
     }
@@ -191,8 +192,8 @@ void CartManager::sendMakeOrderSignal()
     close();
 }
 
-OrderDetail::OrderDetail(User *user, QVector<User *> &ulist, Order &order, QWidget *parent)
-    : QWidget(parent), user_list(ulist), now_order(order)
+OrderDetail::OrderDetail(User *user, QVector<User *> &ulist, QVector<Product *> &plist, Order &order, QWidget *parent)
+    : QWidget(parent), user_list(ulist), product_list(plist), now_order(order)
 {
     now_user = user;
     setAttribute(Qt::WA_QuitOnClose,false);
@@ -216,8 +217,7 @@ OrderDetail::OrderDetail(User *user, QVector<User *> &ulist, Order &order, QWidg
 
     error_text = new QLabel(this);
     error_text->setStyleSheet("color:red;");
-    error_text->setText("余额不足!");
-    error_text->move(180, 210);
+    error_text->move(120, 210);
     error_text->hide();
 
     table_widget = new QTableWidget(order.list.size(), 3, this);
@@ -249,14 +249,24 @@ OrderDetail::OrderDetail(User *user, QVector<User *> &ulist, Order &order, QWidg
         table_widget->setItem(i, 2, item);
     }
 
-    if (!now_order.is_purchased)
+    if (!now_order.is_purchased && !now_order.is_canceled)
     {
         cancel_btn = new QPushButton("取消订单", this);
         cancel_btn->move(15, 207);
+        connect(cancel_btn, &QPushButton::clicked, this, &OrderDetail::cancelOrder);
 
         purchase_btn = new QPushButton("付款", this);
         purchase_btn->move(240, 207);
         connect(purchase_btn, &QPushButton::clicked, this, &OrderDetail::purchaseOrder);
+
+        error_text->setText("请在30分钟内付款");
+        error_text->show();
+    }
+
+    if (now_order.is_canceled)
+    {
+        error_text->setText("订单已取消");
+        error_text->show();
     }
 
     show();
@@ -283,13 +293,30 @@ void OrderDetail::purchaseOrder()
     }
     else
     {
+        error_text->setText("余额不足!");
         error_text->show();
     }
     emit refreshSignal();
 }
 
-OrderManager::OrderManager(User *user, QVector<User *> &ulist, QVector<Order> &olist, QWidget *parent)
-    : QWidget(parent), user_list(ulist), order_list(olist)
+void OrderDetail::cancelOrder()
+{
+    for (auto i = now_order.list.begin(); i < now_order.list.end(); i++)    //恢复冻结
+    {
+        for (auto j = product_list.begin(); j < product_list.end(); j++)
+            if (i->first.getName() == (*j)->getName() && i->first.getSellerName() == (*j)->getSellerName())
+            {
+                (*j)->setAmount((*j)->getAmount() + i->second);
+                break;
+            }
+    }
+    now_order.is_canceled = true;
+    emit refreshSignal();
+    close();
+}
+
+OrderManager::OrderManager(User *user, QVector<User *> &ulist, QVector<Product *> &plist, QVector<Order> &olist, QWidget *parent)
+    : QWidget(parent), user_list(ulist),product_list(plist), order_list(olist)
 {
     now_user = user;
     order_detail = nullptr;
@@ -316,6 +343,9 @@ OrderManager::OrderManager(User *user, QVector<User *> &ulist, QVector<Order> &o
     refreshAndSendRefreshSignal();
     connect(table_widget, &QTableWidget::itemDoubleClicked, this, &OrderManager::openOrderDetail);
 
+    for (auto i = order_list.begin(); i < order_list.end(); i++)    //过期取消
+        if (QDateTime::currentDateTime() > i->buying_time.addSecs(1800))
+            i->is_canceled = true;
     show();
 }
 
@@ -323,7 +353,7 @@ void OrderManager::openOrderDetail(QTableWidgetItem *item)
 {
     if (order_detail == nullptr)
     {
-        order_detail = new OrderDetail(now_user, user_list, order_list[item->row()]);
+        order_detail = new OrderDetail(now_user, user_list, product_list, order_list[item->row()]);
         connect(order_detail, &OrderDetail::destroyed, this, &OrderManager::closeOrderDetail);
         connect(order_detail, &OrderDetail::refreshSignal, this, &OrderManager::refreshAndSendRefreshSignal);
     }
@@ -358,7 +388,9 @@ void OrderManager::refreshAndSendRefreshSignal()
         item = new QTableWidgetItem(QString::number(total_price));
         item->setTextAlignment(Qt::AlignHCenter|Qt::AlignVCenter);
         table_widget->setItem(i, 1, item);
-        if (order_list[i].is_purchased)
+        if (order_list[i].is_canceled)
+            item = new QTableWidgetItem("已取消");
+        else if (order_list[i].is_purchased)
             item = new QTableWidgetItem("已付款");
         else
             item = new QTableWidgetItem("未付款");

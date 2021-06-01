@@ -110,6 +110,7 @@ MainWindow::MainWindow(User *user, QVector<User *> &ulist, QWidget *parent)
             }
             new_order.buying_time = QDateTime::fromString(order_array[i].toObject()["buying_time"].toString());
             new_order.is_purchased = order_array[i].toObject()["is_purchased"].toBool();
+            new_order.is_canceled = order_array[i].toObject()["is_canceled"].toBool();
             order_list.push_back(new_order);
         }
         order_file.close();
@@ -168,6 +169,7 @@ MainWindow::~MainWindow()
             object["list"] = cart_array;
             object["buying_time"] = i->buying_time.toString();
             object["is_purchased"] = i->is_purchased;
+            object["is_canceled"] = i->is_canceled;
             order_array.push_back(object);
         }
         order_json[now_user->getUserName()] = order_array;

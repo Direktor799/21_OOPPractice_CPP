@@ -42,6 +42,7 @@ struct Order
     QVector<QPair<Product, int> > list;
     QDateTime buying_time;
     bool is_purchased;
+    bool is_canceled;
 };
 
 class OrderDetail : public QWidget
@@ -50,6 +51,7 @@ class OrderDetail : public QWidget
 private:
     User *now_user;
     QVector<User *> &user_list;  //从json文件读取的用户信息
+    QVector<Product *> &product_list;
     Order &now_order;
     QTableWidget *table_widget;
     QLabel *time_text;
@@ -60,7 +62,7 @@ private:
     void purchaseOrder();
     void cancelOrder();
 public:
-    explicit OrderDetail(User *user, QVector<User *> &ulist, Order &order, QWidget *parent = nullptr);
+    explicit OrderDetail(User *user, QVector<User *> &ulist, QVector<Product *> &plist, Order &order, QWidget *parent = nullptr);
 signals:
     void refreshSignal();
 };
@@ -71,6 +73,7 @@ class OrderManager : public QWidget
 private:
     User *now_user;
     QVector<User *> &user_list;  //从json文件读取的用户信息
+    QVector<Product *> &product_list;
     QVector<Order> &order_list;
     QTableWidget *table_widget;
     OrderDetail *order_detail;
@@ -78,7 +81,7 @@ private:
     void closeOrderDetail();
     void refreshAndSendRefreshSignal();
 public:
-    explicit OrderManager(User *user, QVector<User *> &ulist, QVector<Order> &olist, QWidget *parent = nullptr);
+    explicit OrderManager(User *user, QVector<User *> &ulist, QVector<Product *> &plist, QVector<Order> &olist, QWidget *parent = nullptr);
 signals:
     void refreshSignal();
 };
