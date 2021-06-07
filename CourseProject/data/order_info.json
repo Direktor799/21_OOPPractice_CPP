@@ -1,102 +1,34 @@
 {
     "1": [
         {
-            "buying_time": "Wed Jun 2 01:36:47 2021",
-            "is_canceled": false,
-            "is_purchased": true,
-            "list": [
-                {
-                    "amount": 83,
-                    "buying_amount": 1,
-                    "describe": "A book for beginners in c++",
-                    "discount": 50,
-                    "name": "《C++ Primer》",
-                    "price": 35,
-                    "sellername": "12",
-                    "type": "Book"
-                }
-            ]
-        },
-        {
-            "buying_time": "Wed Jun 2 01:33:53 2021",
+            "buying_time": "Tue Jun 8 01:05:06 2021",
             "is_canceled": true,
             "is_purchased": false,
             "list": [
                 {
-                    "amount": 10000,
-                    "buying_amount": 200,
+                    "amount": 2,
+                    "buying_amount": 1,
+                    "describe": "2",
+                    "discount": 2,
+                    "name": "2",
+                    "price": 2,
+                    "sellername": "12",
+                    "type": "None"
+                }
+            ]
+        },
+        {
+            "buying_time": "Tue Jun 8 01:04:43 2021",
+            "is_canceled": false,
+            "is_purchased": true,
+            "list": [
+                {
+                    "amount": 1,
+                    "buying_amount": 1,
                     "describe": "1",
-                    "discount": 100,
-                    "name": "shangjiahaha",
+                    "discount": 1,
+                    "name": "1",
                     "price": 1,
-                    "sellername": "sj",
-                    "type": "Book"
-                }
-            ]
-        },
-        {
-            "buying_time": "Wed Jun 2 01:32:58 2021",
-            "is_canceled": false,
-            "is_purchased": true,
-            "list": [
-                {
-                    "amount": 84,
-                    "buying_amount": 1,
-                    "describe": "A book for beginners in c++",
-                    "discount": 100,
-                    "name": "《C++ Primer》",
-                    "price": 35,
-                    "sellername": "12",
-                    "type": "Book"
-                }
-            ]
-        },
-        {
-            "buying_time": "Wed Jun 2 01:28:11 2021",
-            "is_canceled": true,
-            "is_purchased": false,
-            "list": [
-                {
-                    "amount": 84,
-                    "buying_amount": 2,
-                    "describe": "A book for beginners in c++",
-                    "discount": 100,
-                    "name": "《C++ Primer》",
-                    "price": 35,
-                    "sellername": "12",
-                    "type": "Book"
-                }
-            ]
-        },
-        {
-            "buying_time": "Wed Jun 2 01:27:54 2021",
-            "is_canceled": false,
-            "is_purchased": true,
-            "list": [
-                {
-                    "amount": 86,
-                    "buying_amount": 2,
-                    "describe": "A book for beginners in c++",
-                    "discount": 100,
-                    "name": "《C++ Primer》",
-                    "price": 35,
-                    "sellername": "12",
-                    "type": "Book"
-                }
-            ]
-        },
-        {
-            "buying_time": "Wed Jun 2 01:26:00 2021",
-            "is_canceled": true,
-            "is_purchased": false,
-            "list": [
-                {
-                    "amount": 86,
-                    "buying_amount": 2,
-                    "describe": "A book for beginners in c++",
-                    "discount": 100,
-                    "name": "《C++ Primer》",
-                    "price": 35,
                     "sellername": "12",
                     "type": "Book"
                 }

@@ -1,67 +1,22 @@
 {
     "product_info": [
         {
-            "amount": 82,
-            "describe": "A book for beginners in c++",
-            "discount": 50,
-            "name": "《C++ Primer》",
-            "price": 35,
-            "sellername": "12",
-            "type": "Book"
-        },
-        {
-            "amount": 10000,
+            "amount": 0,
             "describe": "1",
-            "discount": 100,
-            "name": "shangjiahaha",
+            "discount": 1,
+            "name": "1",
             "price": 1,
-            "sellername": "sj",
-            "type": "Book"
-        },
-        {
-            "amount": 3,
-            "describe": "你买不到的好货",
-            "discount": 50,
-            "name": "GTX3080Ti",
-            "price": 12000,
             "sellername": "12",
-            "type": "Electronic"
+            "type": "Book"
         },
         {
             "amount": 2,
             "describe": "2",
-            "discount": 50,
-            "name": "shangjiahaha",
+            "discount": 2,
+            "name": "2",
             "price": 2,
             "sellername": "12",
-            "type": "Book"
-        },
-        {
-            "amount": 0,
-            "describe": "111",
-            "discount": 50,
-            "name": "啥也不是",
-            "price": 100,
-            "sellername": "12",
             "type": "None"
-        },
-        {
-            "amount": 1,
-            "describe": "1",
-            "discount": 50,
-            "name": "11111111111111111111111111111111111111111111111111111111111111111111",
-            "price": 1,
-            "sellername": "12",
-            "type": "Book"
-        },
-        {
-            "amount": 7,
-            "describe": "99",
-            "discount": 50,
-            "name": "999",
-            "price": 99,
-            "sellername": "12",
-            "type": "Book"
         }
     ]
 }
